@@ -220,7 +220,7 @@ src/
 └── contexts/             # React contexts
 ```
 
-## Hackathon Highlights
+## Project Highlights
 
 ### **Innovation**
 - **First conversational AI** specifically for Solana ecosystem
@@ -253,10 +253,6 @@ src/
 - **Multi-Agent**: Specialized agents for different domains
 - **Cross-Chain**: Extend to other blockchain ecosystems
 - **Analytics**: User behavior insights and query optimization
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## License
 
