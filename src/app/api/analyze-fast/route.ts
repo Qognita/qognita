@@ -66,21 +66,19 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Removed hardcoded classifyAddress function - now using proper AddressClassifier
-
 async function analyzeToken(address: string, result: any) {
   console.log('🔍 Analyzing token...')
-  
+
   try {
     // Quick DexScreener check
     const dexResponse = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${address}`, {
       signal: AbortSignal.timeout(3000)
     })
-    
+
     if (dexResponse.ok) {
       const dexData = await dexResponse.json()
       const pair = dexData.pairs?.[0]
-      
+
       if (pair) {
         result.tokenInfo = {
           name: pair.baseToken.name,
@@ -96,7 +94,7 @@ async function analyzeToken(address: string, result: any) {
         // Quick honeypot checks
         const buyCount = pair.txns?.h24?.buys || 0
         const sellCount = pair.txns?.h24?.sells || 0
-        
+
         if (buyCount > 0 && sellCount === 0) {
           result.risks.push({
             type: 'Honeypot Risk',
@@ -135,7 +133,7 @@ async function analyzeToken(address: string, result: any) {
               rank: 1
             },
             {
-              address: "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh", 
+              address: "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh",
               amount: "30000000",
               uiAmount: 30000000,
               percentage: 9.3,
@@ -143,7 +141,7 @@ async function analyzeToken(address: string, result: any) {
             },
             {
               address: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
-              amount: "25000000", 
+              amount: "25000000",
               uiAmount: 25000000,
               percentage: 7.8,
               rank: 3
@@ -151,7 +149,7 @@ async function analyzeToken(address: string, result: any) {
             {
               address: "4vJ9JU1bJJE96FWSJKvHsmmFADCg4gpZQff4P3bkLKi",
               amount: "20000000",
-              uiAmount: 20000000, 
+              uiAmount: 20000000,
               percentage: 6.2,
               rank: 4
             },
@@ -184,25 +182,25 @@ async function analyzeToken(address: string, result: any) {
 
 async function analyzeProgram(address: string, result: any) {
   console.log('🔍 Analyzing program with smart contract security scanning...')
-  
+
   try {
     // Try to import and use smart contract scanner
     const { SmartContractScanner } = await import('@/lib/services/smartContractScanner')
     const scanner = new SmartContractScanner()
-    
+
     // Perform comprehensive security scan
     const smartContractAnalysis = await scanner.scanProgram(address)
-    
+
     result.programAnalysis = {
       programType: 'Custom Program',
       isUpgradeable: smartContractAnalysis.vulnerabilities.some(v => v.type === 'AUTHORITY_ABUSE'),
       riskLevel: smartContractAnalysis.riskLevel,
       smartContractAnalysis
     }
-    
+
     // Calculate trust score based on security analysis
     result.trustScore = smartContractAnalysis.securityScore
-    
+
     // Add vulnerabilities as risks
     smartContractAnalysis.vulnerabilities.forEach(vuln => {
       result.risks.push({
@@ -211,7 +209,7 @@ async function analyzeProgram(address: string, result: any) {
         description: `${vuln.description} | ${vuln.recommendation}`
       })
     })
-    
+
     // Add summary risk if no specific vulnerabilities
     if (smartContractAnalysis.vulnerabilities.length === 0) {
       result.risks.push({
@@ -220,28 +218,28 @@ async function analyzeProgram(address: string, result: any) {
         description: 'No major security vulnerabilities detected in smart contract analysis'
       })
     }
-    
+
     console.log(`✅ Smart contract analysis completed: ${smartContractAnalysis.vulnerabilities.length} vulnerabilities found`)
-    
+
   } catch (error) {
     console.warn('Smart contract scanner failed, falling back to basic analysis:', error)
-    
+
     // Fallback to basic program analysis
     result.programAnalysis = {
       programType: 'Solana Program',
       isUpgradeable: true,
       riskLevel: 'MEDIUM'
     }
-    
+
     result.trustScore = 60
-    
+
     // Check if it's a known program
     const knownPrograms = {
       'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA': 'Token Program',
       '11111111111111111111111111111112': 'System Program',
       'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4': 'Jupiter Aggregator'
     }
-    
+
     if (knownPrograms[address as keyof typeof knownPrograms]) {
       result.programAnalysis.programType = knownPrograms[address as keyof typeof knownPrograms]
       result.trustScore = 85
@@ -264,12 +262,12 @@ async function analyzeProgram(address: string, result: any) {
 
 async function analyzeTransaction(address: string, result: any) {
   console.log('🔍 Analyzing transaction...')
-  
+
   try {
     // Use enhanced analysis service for proper transaction type detection
     const enhancedAnalysis = new EnhancedAnalysisService()
     const transactionAnalysis = await enhancedAnalysis.analyzeTransaction(address)
-    
+
     result.transactionAnalysis = {
       signature: address,
       transactionType: transactionAnalysis.transactionType,
@@ -277,7 +275,7 @@ async function analyzeTransaction(address: string, result: any) {
       involvedPrograms: transactionAnalysis.involvedPrograms,
       tokenTransfers: transactionAnalysis.tokenTransfers
     }
-    
+
     // Add any risks from transaction analysis
     if (transactionAnalysis.riskFactors.length > 0) {
       result.risks = result.risks || []
@@ -290,7 +288,7 @@ async function analyzeTransaction(address: string, result: any) {
         })
       })
     }
-    
+
   } catch (error) {
     console.error('Enhanced transaction analysis failed:', error)
     // Fallback to basic analysis
@@ -300,21 +298,21 @@ async function analyzeTransaction(address: string, result: any) {
       isSuccessful: true
     }
   }
-  
+
   // No trust score for transactions - just analysis data
   result.trustScore = null
-  
+
   return result
 }
 
 async function analyzeWallet(address: string, result: any) {
   console.log('🔍 Analyzing wallet with REAL Solana blockchain data...')
-  
+
   try {
     // Use real Solana service to fetch blockchain data
     const solanaService = new SolanaService()
     const walletData = await solanaService.getWalletData(address)
-    
+
     result.walletAnalysis = {
       address: address,
       balance: walletData.balance,
@@ -328,7 +326,7 @@ async function analyzeWallet(address: string, result: any) {
       allTransactions: walletData.allTransactions,
       tokenHoldings: walletData.tokenHoldings
     }
-    
+
     // Add activity-based risk assessment
     if (walletData.totalTransactions === 0) {
       result.risks.push({
@@ -343,9 +341,9 @@ async function analyzeWallet(address: string, result: any) {
         description: 'This wallet has very high transaction activity - could be a bot or exchange wallet'
       })
     }
-    
+
     console.log(`✅ REAL wallet data fetched: ${walletData.balance} SOL (~$${(walletData.balance * walletData.solPrice).toFixed(2)}), ${walletData.totalTransactions} transactions`)
-    
+
   } catch (error) {
     console.error('Real wallet analysis failed:', error)
     result.risks.push({
@@ -353,11 +351,11 @@ async function analyzeWallet(address: string, result: any) {
       severity: 'medium',
       description: `Could not fetch real wallet data: ${error instanceof Error ? error.message : String(error)}`
     })
-    
+
     // Fallback to mock data if real data fails
     console.log('🔄 Falling back to mock data...')
     const mockWalletData = await fetchCompleteWalletData(address)
-    
+
     result.walletAnalysis = {
       address: address,
       balance: mockWalletData.balance,
@@ -370,24 +368,24 @@ async function analyzeWallet(address: string, result: any) {
       tokenHoldings: mockWalletData.tokenHoldings
     }
   }
-  
+
   // No trust score for wallets
   result.trustScore = null
-  
+
   return result
 }
 
 async function fetchCompleteWalletData(address: string) {
   // In production, this would make real Solana RPC calls to get ALL data
   // For now, return comprehensive mock data
-  
+
   const mockData = {
     balance: 15.75,
     totalTransactions: 1247,
     firstActivity: Date.now() - (365 * 24 * 60 * 60 * 1000), // 1 year ago
     lastActivity: Date.now() - 3600000, // 1 hour ago
     totalValue: 3875.50, // Total portfolio value in USD
-    
+
     // ALL transaction history (in production, this would be paginated)
     allTransactions: [
       {
@@ -434,7 +432,7 @@ async function fetchCompleteWalletData(address: string) {
       }
       // In production, this would contain ALL transactions from wallet creation
     ],
-    
+
     tokenHoldings: [
       {
         mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -483,7 +481,7 @@ async function fetchCompleteWalletData(address: string) {
       }
     ]
   }
-  
+
   return mockData
 }
 
@@ -621,7 +619,7 @@ function generateTokenReport(result: any): string {
     report += `## Token Information\n`
     report += `- **Name:** ${tokenInfo.name || 'Unknown'}\n`
     report += `- **Symbol:** ${tokenInfo.symbol || 'Unknown'}\n`
-    
+
     if (tokenInfo.marketData) {
       report += `- **Price:** $${tokenInfo.marketData.price || 'Unknown'}\n`
       report += `- **Market Cap:** $${tokenInfo.marketData.marketCap?.toLocaleString() || 'Unknown'}\n`
@@ -649,7 +647,7 @@ function generateProgramReport(result: any): string {
     report += `- **Risk Level:** ${scAnalysis.riskLevel}\n`
     report += `- **Source Code Verified:** ${scAnalysis.isVerified ? '✅ Yes' : '❌ No'}\n`
     report += `- **Vulnerabilities Found:** ${scAnalysis.vulnerabilities.length}\n\n`
-    
+
     if (scAnalysis.vulnerabilities.length > 0) {
       report += `### Security Vulnerabilities Detected:\n`
       scAnalysis.vulnerabilities.forEach((vuln: any, index: number) => {
@@ -700,13 +698,13 @@ function generateTransactionReport(result: any): string {
 
 function generateWalletReport(result: any): string {
   const { walletAnalysis } = result
-  
+
   let report = `# Wallet Overview\n\n`
-  
+
   if (walletAnalysis) {
     const solPrice = walletAnalysis.solPrice || 100
     const usdValue = (walletAnalysis.balance * solPrice).toFixed(2)
-    
+
     report += `## Key Information\n\n`
     report += `• **Address:** \`${walletAnalysis.address}\`\n`
     report += `• **Current SOL Balance:** ${walletAnalysis.balance} SOL (~$${usdValue})\n`
@@ -715,7 +713,7 @@ function generateWalletReport(result: any): string {
     report += `• **Total Transactions:** ${walletAnalysis.totalTransactions?.toLocaleString()} (all-time)\n`
     report += `• **First Activity:** ${new Date(walletAnalysis.firstActivity).toLocaleDateString()}\n`
     report += `• **Last Activity:** ${new Date(walletAnalysis.lastActivity).toLocaleString()}\n\n`
-    
+
     report += `*Use chat to query specific transaction details, token holdings, transfer history, and more.*\n\n`
   } else {
     report += `**Address:** ${result.address}\n`

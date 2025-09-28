@@ -1,6 +1,30 @@
-<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M50 40C50 40 70 20 100 20C130 20 150 40 150 40L140 60C140 60 125 45 100 45C75 45 60 60 60 60L50 40Z" fill="#4A5568"/>
-  <path d="M150 160C150 160 130 180 100 180C70 180 50 160 50 160L60 140C60 140 75 155 100 155C125 155 140 140 140 140L150 160Z" fill="#4A5568"/>
-  <circle cx="100" cy="100" r="30" fill="none" stroke="#4A5568" stroke-width="8"/>
-  <circle cx="100" cy="100" r="15" fill="none" stroke="#4A5568" stroke-width="6"/>
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00FFA3"></stop>
+      <stop offset="50%" stop-color="#00E5FF"></stop>
+      <stop offset="100%" stop-color="#DC1FFF"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer ring -->
+  <circle cx="256" cy="256" r="200" stroke="url(#grad)" stroke-width="28" fill="none"></circle>
+
+  <!-- Inner concentric rings -->
+  <circle cx="256" cy="256" r="140" stroke="url(#grad)" stroke-width="12" fill="none"></circle>
+  <circle cx="256" cy="256" r="90" stroke="url(#grad)" stroke-width="8" fill="none"></circle>
+
+  <!-- Central cluster (triangle network) -->
+  <circle cx="256" cy="226" r="10" fill="url(#grad)"></circle>
+  <circle cx="236" cy="266" r="10" fill="url(#grad)"></circle>
+  <circle cx="276" cy="266" r="10" fill="url(#grad)"></circle>
+
+  <!-- Connect the cluster nodes -->
+  <g stroke="url(#grad)" stroke-width="4">
+    <line x1="256" y1="226" x2="236" y2="266"></line>
+    <line x1="256" y1="226" x2="276" y2="266"></line>
+    <line x1="236" y1="266" x2="276" y2="266"></line>
+  </g>
 </svg>

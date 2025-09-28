@@ -78,7 +78,7 @@ export default function Home() {
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-300 mb-2 font-raleway">AI-Powered</div>
-                <div className="text-gray-300">Morpheus + OpenAI integration</div>
+                <div className="text-gray-300">OpenAI GPT-4o integration</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-cyan-400 mb-2 font-raleway">Comprehensive</div>
@@ -166,7 +166,7 @@ export default function Home() {
       <footer className="border-t border-white/10 bg-navy-900/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-gray-400">
-            <p>&copy; 2024 Qognita. Built with ❤️ for the Solana ecosystem.</p>
+            <p>&copy; 2024 Qognita.</p>
           </div>
         </div>
       </footer>

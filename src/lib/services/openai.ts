@@ -1,6 +1,5 @@
 import OpenAI from 'openai'
 import { ChatMessage } from '@/lib/types/api'
-import { SecurityAnalysis } from '@/lib/types/security'
 
 export class OpenAIService {
   private client: OpenAI
