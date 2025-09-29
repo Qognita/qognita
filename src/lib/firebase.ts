@@ -22,9 +22,9 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Initialize Analytics (only in browser)
+// Initialize Analytics (only in browser and not in production)
 let analytics;
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
   analytics = getAnalytics(app);
 }
 export { analytics };
