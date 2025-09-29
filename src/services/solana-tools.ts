@@ -8,10 +8,10 @@ import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 
 // Multiple RPC endpoints for reliability
 const RPC_ENDPOINTS = [
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
   'https://rpc.ankr.com/solana',
-  'https://solana-api.projectserum.com',
   'https://api.mainnet-beta.solana.com',
-  'https://solana.public-rpc.com'
+  'https://solana-mainnet.g.alchemy.com/v2/demo'
 ]
 
 let currentRpcIndex = 0
@@ -32,7 +32,12 @@ async function executeWithFallback<T>(operation: (connection: Connection) => Pro
       return result
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error))
-      console.warn(`RPC endpoint ${i + 1} failed:`, error)
+      console.warn(`RPC endpoint ${RPC_ENDPOINTS[(currentRpcIndex + i) % RPC_ENDPOINTS.length]} failed:`, error)
+      
+      // Special handling for JSON parse errors (HTML responses)
+      if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
+        console.error(`RPC returned HTML instead of JSON from ${RPC_ENDPOINTS[(currentRpcIndex + i) % RPC_ENDPOINTS.length]}`)
+      }
       
       if (i < RPC_ENDPOINTS.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 1000))
