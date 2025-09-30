@@ -15,10 +15,19 @@ import {
 import { generateTokenomics, analyzeTokenomics } from '@/services/tokenomics-tools'
 import { checkForHoneypotPatterns, quickSecurityCheck } from '@/services/security-tools'
 
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-})
+// Lazy initialize OpenAI client
+let _openaiClient: OpenAI | null = null
+function getOpenAIClient(): OpenAI {
+  if (!_openaiClient) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OpenAI API key not configured')
+    }
+    _openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  }
+  return _openaiClient
+}
 
 export interface OnChainQueryResult {
   response: string
@@ -81,6 +90,7 @@ export async function processOnChainQuery(
   })
 
   // Get initial AI response with tool selection
+  const openai = getOpenAIClient()
   const initialResponse = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: aiMessages,
@@ -221,7 +231,7 @@ export async function processOnChainQuery(
 
     return {
       response: finalAnswer || 'Unable to generate response',
-      toolsUsed: toolCalls.map(tc => tc.function.name),
+      toolsUsed: toolCalls.map((tc: any) => tc.function.name),
       toolResults
     }
   } else {

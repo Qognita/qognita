@@ -1,17 +1,55 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Lazy initialization to avoid build-time errors
+let _supabase: SupabaseClient | null = null
+let _supabaseAdmin: SupabaseClient | null = null
 
-// Client for frontend operations
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+function getSupabaseUrl(): string {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!url) {
+        throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable')
+    }
+    return url
+}
 
-// Admin client for backend operations (has elevated permissions)
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
+function getSupabaseAnonKey(): string {
+    const key = process.env.SUPABASE_ANON_KEY
+    if (!key) {
+        throw new Error('Missing SUPABASE_ANON_KEY environment variable')
+    }
+    return key
+}
+
+function getSupabaseServiceRoleKey(): string {
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!key) {
+        throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable')
+    }
+    return key
+}
+
+// Client for frontend operations (lazy initialization)
+export const supabase = new Proxy({} as SupabaseClient, {
+    get(target, prop) {
+        if (!_supabase) {
+            _supabase = createClient(getSupabaseUrl(), getSupabaseAnonKey())
+        }
+        return (_supabase as any)[prop]
+    }
+})
+
+// Admin client for backend operations (lazy initialization)
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+    get(target, prop) {
+        if (!_supabaseAdmin) {
+            _supabaseAdmin = createClient(getSupabaseUrl(), getSupabaseServiceRoleKey(), {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                }
+            })
+        }
+        return (_supabaseAdmin as any)[prop]
     }
 })
 
