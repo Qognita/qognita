@@ -41,3 +41,4 @@ coverage/
 # Build outputs
 build/
 .env.local
+.next/
