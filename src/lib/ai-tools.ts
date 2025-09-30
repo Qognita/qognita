@@ -260,6 +260,40 @@ export const availableTools = [
       }
     }
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "checkForHoneypotPatterns",
+      description: "Analyzes a Solana token for common honeypot and rug pull patterns, such as active mint/freeze authorities, low liquidity, and high holder concentration. Returns a detailed security risk report. Use this when users ask about token safety, honeypot patterns, or security analysis.",
+      parameters: {
+        type: "object",
+        properties: {
+          address: {
+            type: "string",
+            description: "The token mint address to analyze for security risks"
+          }
+        },
+        required: ["address"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "quickSecurityCheck",
+      description: "Performs a quick security check on a Solana token, focusing on the most critical risk factors. Use this for fast security assessments when users want a quick safety overview.",
+      parameters: {
+        type: "object",
+        properties: {
+          address: {
+            type: "string",
+            description: "The token mint address to perform a quick security check on"
+          }
+        },
+        required: ["address"]
+      }
+    }
+  },
 ]
 
 /**

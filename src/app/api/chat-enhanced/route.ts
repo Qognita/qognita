@@ -14,6 +14,7 @@ import {
   getTokenInfo
 } from '@/services/solana-tools'
 import { generateTokenomics, analyzeTokenomics } from '@/services/tokenomics-tools'
+import { checkForHoneypotPatterns, quickSecurityCheck } from '@/services/security-tools'
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -26,18 +27,33 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('📝 Request body:', body)
     
-    const { query, address, message } = body
+    const { query, address, message, messages, chatHistory } = body
     
-    // Use either 'query' or 'message' for backward compatibility
-    const userQuery = query || message
+    // Support both old format (single query) and new format (full conversation)
+    let conversationMessages: any[] = []
     
-    if (!userQuery) {
-      console.log('❌ Missing query or message:', { query, message })
-      return NextResponse.json(
-        { error: 'Query or message is required' },
-        { status: 400 }
-      )
+    if (messages && Array.isArray(messages)) {
+      // New format: full conversation history
+      conversationMessages = messages
+    } else if (chatHistory && Array.isArray(chatHistory)) {
+      // Alternative format: chatHistory array
+      conversationMessages = chatHistory
+    } else {
+      // Old format: single query/message (backward compatibility)
+      const userQuery = query || message
+      if (!userQuery) {
+        console.log('❌ Missing query, message, or messages array')
+        return NextResponse.json(
+          { error: 'Query, message, or messages array is required' },
+          { status: 400 }
+        )
+      }
+      conversationMessages = [{ role: 'user', content: userQuery }]
     }
+    
+    // Get the latest user message for processing
+    const latestMessage = conversationMessages[conversationMessages.length - 1]
+    const userQuery = latestMessage?.content || query || message
     
     // For transaction analysis, extract transaction hash from query if no address provided
     let targetAddress = address
@@ -64,38 +80,55 @@ export async function POST(request: NextRequest) {
     }
 
     // === AI-First Approach: Let GPT-4 decide what tools to use ===
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    // Build messages array with conversation history
+    const aiMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       {
         role: "system",
         content: SOLANA_ANALYST_SYSTEM_PROMPT
-      },
-      {
-        role: "user",
-        content: `User query about Solana address ${targetAddress}: ${userQuery}`
       }
     ]
+    
+    // Add conversation history (maintaining context)
+    if (conversationMessages.length > 1) {
+      // Add previous conversation turns
+      for (let i = 0; i < conversationMessages.length - 1; i++) {
+        const msg = conversationMessages[i]
+        aiMessages.push({
+          role: msg.role as "user" | "assistant",
+          content: msg.content
+        })
+      }
+    }
+    
+    // Add current user message with address context if available
+    const currentUserContent = targetAddress && targetAddress !== 'N/A' 
+      ? `User query about Solana address ${targetAddress}: ${userQuery}`
+      : userQuery
+      
+    aiMessages.push({
+      role: "user",
+      content: currentUserContent
+    })
 
     console.log('🧠 Sending query to AI with available tools...')
 
     const initialResponse = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages,
+      messages: aiMessages,
       tools: availableTools,
       tool_choice: "auto",
       temperature: 0.1, // Low temperature for factual accuracy
     })
-
     const responseMessage = initialResponse.choices[0].message
     const toolCalls = responseMessage.tool_calls
 
     // === Execute tool calls if AI requested them ===
     if (toolCalls && toolCalls.length > 0) {
-      console.log(`🛠️ AI requested ${toolCalls.length} tool calls`)
+      console.log(`🔧 AI requested ${toolCalls.length} tool(s):`, toolCalls.map(tc => tc.function.name))
 
-      // Add the AI's response to conversation history
-      messages.push(responseMessage)
+      // Add the assistant's message with tool calls first
+      aiMessages.push(responseMessage)
 
-      // Execute each tool call
       for (const toolCall of toolCalls) {
         const functionName = toolCall.function.name
         const functionArgs = JSON.parse(toolCall.function.arguments)
@@ -177,6 +210,14 @@ export async function POST(request: NextRequest) {
               functionResponse = await analyzeTokenomics(functionArgs.tokenAddress)
               break
 
+            case "checkForHoneypotPatterns":
+              functionResponse = await checkForHoneypotPatterns(functionArgs.address || targetAddress)
+              break
+
+            case "quickSecurityCheck":
+              functionResponse = await quickSecurityCheck(functionArgs.address || targetAddress)
+              break
+
             default:
               throw new Error(`Unknown function: ${functionName}`)
           }
@@ -184,7 +225,7 @@ export async function POST(request: NextRequest) {
           console.log(`✅ Tool ${functionName} executed successfully`)
 
           // Send the raw result back to AI
-          messages.push({
+          aiMessages.push({
             tool_call_id: toolCall.id,
             role: "tool",
             content: JSON.stringify(functionResponse),
@@ -194,20 +235,20 @@ export async function POST(request: NextRequest) {
           console.error(`❌ Tool ${functionName} failed:`, error)
           
           // Send error back to AI so it can handle gracefully
-          messages.push({
+          aiMessages.push({
             tool_call_id: toolCall.id,
             role: "tool",
-            content: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            content: JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
           })
         }
       }
 
       // === Get final AI response with tool results ===
-      console.log('🧠 Getting final AI response with tool results...')
+      console.log('🔄 Getting final AI response with tool results...')
 
       const finalResponse = await openai.chat.completions.create({
         model: "gpt-4o",
-        messages,
+        messages: aiMessages,
         temperature: 0.1
       })
 
