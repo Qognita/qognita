@@ -13,6 +13,7 @@ import {
   getTokenHolders,
   getTokenInfo
 } from '@/services/solana-tools'
+import { generateTokenomics, analyzeTokenomics } from '@/services/tokenomics-tools'
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -160,6 +161,20 @@ export async function POST(request: NextRequest) {
 
             case "getTokenInfo":
               functionResponse = await getTokenInfo(functionArgs.mintAddress || targetAddress)
+              break
+
+            case "generateTokenomics":
+              functionResponse = await generateTokenomics({
+                name: functionArgs.name,
+                description: functionArgs.description,
+                useCase: functionArgs.useCase,
+                targetMarket: functionArgs.targetMarket,
+                totalSupply: functionArgs.totalSupply
+              })
+              break
+
+            case "analyzeTokenomics":
+              functionResponse = await analyzeTokenomics(functionArgs.tokenAddress)
               break
 
             default:

@@ -210,6 +210,56 @@ export const availableTools = [
       },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "generateTokenomics",
+      description: "Generate comprehensive tokenomics structure for a Solana project including distribution, utilities, governance, and economic mechanisms. Use this when users ask about creating tokenomics, token distribution, or economic models.",
+      parameters: {
+        type: "object",
+        properties: {
+          name: {
+            type: "string",
+            description: "The name of the project or token"
+          },
+          description: {
+            type: "string", 
+            description: "Brief description of the project and its purpose"
+          },
+          useCase: {
+            type: "string",
+            description: "Primary use case or utility of the token (e.g., governance, payments, staking)"
+          },
+          targetMarket: {
+            type: "string",
+            description: "Target market or user base (optional)"
+          },
+          totalSupply: {
+            type: "number",
+            description: "Preferred total token supply (optional, will suggest optimal if not provided)"
+          }
+        },
+        required: ["name", "description", "useCase"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "analyzeTokenomics",
+      description: "Analyze existing tokenomics for a Solana token and provide improvement recommendations. Use this when users want to evaluate or improve existing token economics.",
+      parameters: {
+        type: "object",
+        properties: {
+          tokenAddress: {
+            type: "string",
+            description: "The token mint address to analyze"
+          }
+        },
+        required: ["tokenAddress"]
+      }
+    }
+  },
 ]
 
 /**

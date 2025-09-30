@@ -95,10 +95,10 @@ async function handleOnChainQuery(
 
     try {
         // Call existing chat-enhanced API for function calling
-        const baseUrl = process.env.NODE_ENV === 'development' 
-            ? 'http://localhost:3000' 
+        const baseUrl = process.env.NODE_ENV === 'development'
+            ? 'http://localhost:3000'
             : 'https://qognita.vercel.app'
-                
+
         const response = await fetch(`${baseUrl}/api/chat-enhanced`, {
             method: 'POST',
             headers: {
