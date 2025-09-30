@@ -4,6 +4,10 @@ import { SolanaService } from '@/services/solana'
 import { EnhancedAnalysisService } from '@/lib/services/enhancedAnalysis'
 import { AddressClassifier } from '@/lib/utils/addressClassifier'
 
+// Force dynamic rendering - prevent static optimization
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()

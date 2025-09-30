@@ -1,5 +1,6 @@
 import { openai } from '@/lib/openai'
 import { KnowledgeService } from '@/services/knowledgeService'
+import { processOnChainQuery } from '@/lib/services/onChainQueryService'
 
 export interface AIRouterResponse {
     response: string
@@ -83,7 +84,7 @@ export async function routeQuery(
 }
 
 /**
- * Handle live blockchain data queries using existing function calling tools
+ * Handle live blockchain data queries using direct service call
  */
 async function handleOnChainQuery(
     query: string,
@@ -94,31 +95,15 @@ async function handleOnChainQuery(
     console.log('📊 Handling on-chain query...')
 
     try {
-        // Call existing chat-enhanced API for function calling
-        const baseUrl = process.env.NODE_ENV === 'development'
-            ? 'http://localhost:3000'
-            : 'https://qognita.vercel.app'
-
-        const response = await fetch(`${baseUrl}/api/chat-enhanced`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                query: query,
-                address: address || 'N/A', // Provide a default if no address
-                chatHistory: chatHistory || []
-            }),
-        })
-
-        const data = await response.json()
+        // Call the on-chain query service directly (no HTTP fetch)
+        const result = await processOnChainQuery(query, address, chatHistory)
 
         return {
-            response: data.response || 'Unable to fetch live blockchain data at this time.',
+            response: result.response || 'Unable to fetch live blockchain data at this time.',
             intent: 'on_chain_query',
             sources: {
                 type: 'live_data',
-                blockchain_data: data.toolResults
+                blockchain_data: result.toolResults
             }
         }
 
