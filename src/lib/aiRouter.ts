@@ -152,13 +152,19 @@ async function handleDocQuery(query: string): Promise<AIRouterResponse> {
       
       User Question: ${query}
 
-      Instructions:
-      - Provide a comprehensive but concise answer
-      - Use the documentation as your primary source
-      - Include relevant technical details and examples when appropriate
-      - Format your response with proper markdown for readability
-      - If you reference specific concepts, explain them briefly
-      
+      Format the answer as high-quality markdown with this structure:
+      ### Short answer
+      - 1-3 concise bullet points with the direct outcome.
+
+      ### Details
+      - Clear explanation with brief definitions where needed
+      - Use bullet lists for steps and key takeaways
+      - Use tables for parameter or field breakdowns when appropriate
+      - Use inline code for identifiers and programs; code blocks for examples
+
+      ### Sources
+      - List each cited doc with a markdown link [Title](URL)
+
       Answer:
     `
 
@@ -220,15 +226,29 @@ async function handleHybridQuery(
             const combinedPrompt = `
         You are Qognita, a Solana AI assistant. The user asked: "${query}"
 
-        I have gathered both documentation and live blockchain data. Please provide a comprehensive response that combines both sources appropriately.
+        I have gathered both documentation and live blockchain data. Provide a comprehensive response that blends both.
 
-        Documentation Response:
+        Documentation Response (verbatim):
         ${docResult.response}
 
-        Live Data Response:
+        Live Data Response (verbatim):
         ${liveResult.response}
 
-        Please create a unified, coherent response that leverages both the documentation context and the live data to fully answer the user's question. Focus on explaining the concept first, then showing how it applies to the specific live data.
+        Format the final answer as markdown with this structure:
+        ### Short answer
+        - 1-3 bullets summarizing the outcome.
+
+        ### Explanation
+        - Explain the concept based on docs; define terms briefly.
+
+        ### Live data insights
+        - Present key numbers/findings as bullets or a small table.
+
+        ### Next steps
+        - Actionable follow-ups or checks.
+
+        ### Sources
+        - Cite docs and indicate live data sources.
       `
 
             const completion = await openai.chat.completions.create({
@@ -272,17 +292,19 @@ async function handleGeneralQuery(query: string): Promise<AIRouterResponse> {
     console.log('💬 Handling general query...')
 
     const generalPrompt = `
-    You are Qognita, an expert AI assistant for everything Solana blockchain. The user said: "${query}"
+    You are Qognita, an expert AI assistant for Solana. The user said: "${query}"
 
-    Provide a helpful, friendly response. If it's a greeting, introduce your capabilities. If it's unclear what they want, guide them toward the types of questions you can answer.
+    Provide a helpful, friendly response. If it's a greeting, briefly introduce capabilities. If unclear, guide them toward concrete question types.
 
-    You can help with:
-    🔍 Live blockchain analysis (wallet balances, token analysis, transaction history)
-    📚 Solana documentation (concepts, development guides, troubleshooting)
-    🛡️ Security analysis (token safety, smart contract risks)
-    🔧 Development help (Anchor, Rust, program development)
+    Format using markdown:
+    ### How I can help
+    - Live blockchain analysis (balances, transactions, holders)
+    - Documentation explanations (concepts, troubleshooting)
+    - Security analysis (honeypot checks, risks)
+    - Development help (Anchor, program basics)
 
-    Keep your response concise and encouraging.
+    ### Suggested prompts
+    - Provide 3-5 concise suggestions tailored to the user's input when unclear.
   `
 
     try {

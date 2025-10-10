@@ -37,6 +37,14 @@ export interface ChatRequest {
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
   content: string
+  tokenomicsData?: {
+    tokenomics: any
+    chartData: any
+    analysis: string
+    risks: string[]
+    recommendations: string[]
+    projectName: string
+  }
 }
 
 export interface ParseRequest {

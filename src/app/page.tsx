@@ -10,7 +10,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Brain className="h-8 w-8 text-blue-400" />
+              <Image src="/logo.svg" alt="Qognita Logo" width={32} height={32} className="text-blue-400" />
               <h1 className="text-2xl font-bold text-white font-raleway">Qognita</h1>
               <span className="text-sm text-gray-400 ml-2">ChatGPT for Solana</span>
             </div>
@@ -46,28 +46,6 @@ export default function Home() {
               >
                 Ask Qognita Anything
               </Link>
-              <button className="border border-white/20 hover:bg-white/10 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
-                See Examples
-              </button>
-            </div>
-
-            {/* Example Queries */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-8 mb-16 text-left max-w-3xl mx-auto">
-              <h3 className="text-xl font-semibold text-white mb-6 text-center font-raleway">Try asking Qognita:</h3>
-              <div className="space-y-4">
-                <div className="bg-white/5 rounded-lg p-4 border-l-4 border-blue-400">
-                  <p className="text-gray-300">"What tokens does wallet 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU hold?"</p>
-                </div>
-                <div className="bg-white/5 rounded-lg p-4 border-l-4 border-blue-300">
-                  <p className="text-gray-300">"How do Jupiter swaps work? Show me a recent swap transaction."</p>
-                </div>
-                <div className="bg-white/5 rounded-lg p-4 border-l-4 border-cyan-400">
-                  <p className="text-gray-300">"My transaction failed with error 0x1771. What does this mean?"</p>
-                </div>
-                <div className="bg-white/5 rounded-lg p-4 border-l-4 border-indigo-400">
-                  <p className="text-gray-300">"Is this token safe? Check for any security concerns: [token address]"</p>
-                </div>
-              </div>
             </div>
 
             {/* Stats */}

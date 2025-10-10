@@ -223,7 +223,7 @@ export const availableTools = [
             description: "The name of the project or token"
           },
           description: {
-            type: "string", 
+            type: "string",
             description: "Brief description of the project and its purpose"
           },
           useCase: {
@@ -355,7 +355,20 @@ Your approach:
 2. I will process the data to count June transfers
 3. You provide the specific count and any relevant context
 
-Be professional, accurate, and helpful. Always cite the specific data you're using.`
+Be professional, accurate, and helpful. Always cite the specific data you're using.
+
+When composing answers, output high-quality markdown with this structure when applicable:
+### Short answer
+- 1-3 bullets summarizing the result
+
+### Details
+- Explanations and steps as bullet lists
+- Use small tables for parameter/field breakdowns
+- Inline code for addresses, programs, or error codes; fenced blocks for multi-line examples
+
+### Sources
+- If you used on-chain tools, note "Live data"
+- If you used docs, include titles and links if available`
 
 /**
  * Helper function to get tool by name
@@ -370,7 +383,7 @@ export function getToolByName(name: string) {
 export function validateToolCall(toolName: string, args: any): boolean {
   const tool = getToolByName(toolName)
   if (!tool) return false
-  
+
   const required = tool.function.parameters.required || []
   return required.every(param => args[param] !== undefined)
 }

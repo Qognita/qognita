@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, MessageSquare, Bot, User, AlertCircle, X, Maximize2, Minimize2 } from 'lucide-react'
+import { Send, MessageSquare, Bot, User, AlertCircle, X, Maximize2, Minimize2, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AnalyzeResponse, ChatMessage } from '@/lib/types/api'
+import { TokenomicsMessage } from '@/components/chat/TokenomicsMessage'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -26,6 +27,7 @@ export function ChatInterface({ analysisContext, isExpanded = false, onToggleExp
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -35,6 +37,16 @@ export function ChatInterface({ analysisContext, isExpanded = false, onToggleExp
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  const copyToClipboard = async (text: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedIndex(index)
+      setTimeout(() => setCopiedIndex(null), 2000) // Reset after 2 seconds
+    } catch (err) {
+      console.error('Failed to copy text:', err)
+    }
+  }
 
   // Add context message when analysis is completed
   useEffect(() => {
@@ -81,11 +93,46 @@ export function ChatInterface({ analysisContext, isExpanded = false, onToggleExp
     }
 
     setMessages(prev => [...prev, userMessage])
+    const userQuery = input.trim()
     setInput('')
     setIsLoading(true)
     setError('')
 
     try {
+      // Check if this is a tokenomics generation request
+      const isTokenomicsRequest = userQuery.toLowerCase().includes('tokenomics') || 
+                                   userQuery.toLowerCase().includes('generate token') ||
+                                   userQuery.toLowerCase().includes('create tokenomics')
+      
+      if (isTokenomicsRequest) {
+        // Import the generateTokenomics function dynamically
+        const { generateTokenomics } = await import('@/services/tokenomics-tools')
+        
+        // Extract project details from the query (simple parsing)
+        const projectName = extractProjectName(userQuery)
+        
+        // Generate tokenomics
+        const tokenomicsResult = await generateTokenomics({
+          name: projectName,
+          description: `A Solana project requesting tokenomics design`,
+          useCase: 'Platform utility, governance, and rewards',
+          targetMarket: 'Solana ecosystem users'
+        })
+        
+        const assistantMessage: ChatMessage = {
+          role: 'assistant',
+          content: `I've generated comprehensive tokenomics for ${projectName}. Check out the interactive charts below!`,
+          tokenomicsData: {
+            ...tokenomicsResult,
+            projectName
+          }
+        }
+        
+        setMessages(prev => [...prev, assistantMessage])
+        setIsLoading(false)
+        return
+      }
+      
       // Extract address from analysis context
       const address = analysisContext?.address || 'unknown'
       
@@ -93,9 +140,10 @@ export function ChatInterface({ analysisContext, isExpanded = false, onToggleExp
       if (address === 'unknown') {
         const helpMessage: ChatMessage = {
           role: 'assistant',
-          content: 'Please analyze a Solana address first so I can provide specific information about that wallet, token, or program. You can enter any Solana address in the analysis form above.'
+          content: 'Please analyze a Solana address first so I can provide specific information about that wallet, token, or program. You can enter any Solana address in the analysis form above.\n\nOr try asking me to "generate tokenomics for [your project name]"!'
         }
         setMessages(prev => [...prev, helpMessage])
+        setIsLoading(false)
         return
       }
       
@@ -106,7 +154,7 @@ export function ChatInterface({ analysisContext, isExpanded = false, onToggleExp
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: input.trim(),
+          query: userQuery,
           address: address
         }),
       })
@@ -138,6 +186,26 @@ export function ChatInterface({ analysisContext, isExpanded = false, onToggleExp
       setIsLoading(false)
     }
   }
+  
+  // Helper function to extract project name from query
+  const extractProjectName = (query: string): string => {
+    // Try to extract project name from common patterns
+    const patterns = [
+      /tokenomics for (.+?)(?:\.|$)/i,
+      /generate tokenomics for (.+?)(?:\.|$)/i,
+      /create tokenomics for (.+?)(?:\.|$)/i,
+      /(.+?) tokenomics/i
+    ]
+    
+    for (const pattern of patterns) {
+      const match = query.match(pattern)
+      if (match && match[1]) {
+        return match[1].trim()
+      }
+    }
+    
+    return 'MyProject'
+  }
 
   const suggestedQuestions = [
     "What should I look for in a safe Solana token?",
@@ -168,58 +236,74 @@ export function ChatInterface({ analysisContext, isExpanded = false, onToggleExp
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex items-start space-x-3 ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
+              className={`flex flex-col ${
+                message.role === 'user' ? 'items-end' : 'items-start'
               }`}
             >
-              {message.role === 'assistant' && (
-                <div className="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-white" />
+              <div className={`flex items-start space-x-3 ${
+                message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+              }`}>
+                {message.role === 'assistant' && (
+                  <div className="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                    <Bot className="h-4 w-4 text-white" />
+                  </div>
+                )}
+                
+                <div
+                  className={`${
+                    message.tokenomicsData ? 'w-full' : 'max-w-[80%]'
+                  } ${
+                    message.role === 'user'
+                      ? 'bg-blue-600 text-white ml-auto p-3 rounded-lg'
+                      : message.tokenomicsData
+                      ? ''
+                      : 'bg-white/10 text-gray-100 p-3 rounded-lg'
+                  }`}
+                >
+                  {message.role === 'user' ? (
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  ) : message.tokenomicsData ? (
+                    <TokenomicsMessage 
+                      data={message.tokenomicsData}
+                      projectName={message.tokenomicsData.projectName}
+                    />
+                  ) : (
+                    <div className="markdown-content text-sm break-words overflow-hidden">
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  )}
                 </div>
-              )}
-              
-              <div
-                className={`max-w-[80%] p-3 rounded-lg ${
-                  message.role === 'user'
-                    ? 'bg-blue-600 text-white ml-auto'
-                    : 'bg-white/10 text-gray-100'
-                }`}
-              >
-                {message.role === 'user' ? (
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                ) : (
-                  <div className="text-sm max-w-none markdown-content break-words overflow-hidden">
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        h1: ({children}) => <h1 className="text-lg font-bold mb-3 mt-2 text-white border-b border-gray-600 pb-1">{children}</h1>,
-                        h2: ({children}) => <h2 className="text-base font-bold mb-2 mt-3 text-white">{children}</h2>,
-                        h3: ({children}) => <h3 className="text-sm font-bold mb-2 mt-2 text-white">{children}</h3>,
-                        p: ({children}) => <p className="mb-3 text-gray-100 leading-relaxed">{children}</p>,
-                        ul: ({children}) => <ul className="list-disc ml-4 mb-3 space-y-1 text-gray-100">{children}</ul>,
-                        ol: ({children}) => <ol className="list-decimal ml-4 mb-3 space-y-1 text-gray-100">{children}</ol>,
-                        li: ({children}) => <li className="text-gray-100 leading-relaxed">{children}</li>,
-                        strong: ({children}) => <strong className="font-bold text-white">{children}</strong>,
-                        em: ({children}) => <em className="italic text-gray-200">{children}</em>,
-                        code: ({children}) => <code className="bg-gray-800 px-2 py-1 rounded text-green-400 text-xs font-mono">{children}</code>,
-                        pre: ({children}) => <pre className="bg-gray-800 p-3 rounded-lg mb-3 overflow-x-auto text-green-400 text-xs font-mono border border-gray-700">{children}</pre>,
-                        blockquote: ({children}) => <blockquote className="border-l-4 border-blue-500 pl-4 py-2 italic text-gray-300 bg-gray-800/30 rounded-r">{children}</blockquote>,
-                        table: ({children}) => <table className="w-full border-collapse border border-gray-600 mb-3">{children}</table>,
-                        th: ({children}) => <th className="border border-gray-600 px-2 py-1 bg-gray-700 text-white font-bold text-left">{children}</th>,
-                        td: ({children}) => <td className="border border-gray-600 px-2 py-1 text-gray-100">{children}</td>,
-                        a: ({children, href}) => <a href={href} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">{children}</a>
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
+                
+                {message.role === 'user' && (
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 text-white" />
                   </div>
                 )}
               </div>
               
-              {message.role === 'user' && (
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
-                </div>
+              {/* Copy button for assistant messages */}
+              {message.role === 'assistant' && !message.tokenomicsData && (
+                <button
+                  onClick={() => copyToClipboard(message.content, index)}
+                  className="ml-11 mt-1 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200 transition-colors group"
+                  title="Copy response"
+                >
+                  {copiedIndex === index ? (
+                    <>
+                      <Check className="h-3 w-3 text-green-400" />
+                      <span className="text-green-400">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3" />
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity">Copy</span>
+                    </>
+                  )}
+                </button>
               )}
             </div>
           ))}
