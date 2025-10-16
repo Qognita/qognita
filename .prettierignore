@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Cache
+.cache/
+.turbo/
+.vercel/
+.swc/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Generated files
+tsconfig.tsbuildinfo
+next-env.d.ts
+
+# Public assets (don't format)
+public/
+
+# Misc
+.DS_Store
+*.pem

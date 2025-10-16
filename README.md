@@ -10,12 +10,16 @@
 
 ## What is Qognita?
 
-Qognita is a **production-ready AI-powered Web3 intelligence platform** specifically designed for the Solana ecosystem. Think "ChatGPT for Solana" with superpowers - users can ask natural language questions about wallets, tokens, transactions, security analysis, and tokenomics, getting intelligent responses that combine **live blockchain data**, **security analysis**, **conversational memory**, and **decentralized AI**.
+Qognita is a **production-ready AI-powered Web3 intelligence platform** specifically designed for
+the Solana ecosystem. Think "ChatGPT for Solana" with superpowers - users can ask natural language
+questions about wallets, tokens, transactions, security analysis, and tokenomics, getting
+intelligent responses that combine **live blockchain data**, **security analysis**, **conversational
+memory**, and **decentralized AI**.
 
 ### The Problem We Solve
 
 - **Fragmented Information**: Solana data is scattered across block explorers, docs, and APIs
-- **Technical Barriers**: Non-technical users struggle with complex blockchain interfaces  
+- **Technical Barriers**: Non-technical users struggle with complex blockchain interfaces
 - **Security Risks**: Users can't easily identify honeypots, rug pulls, and malicious tokens
 - **Tokenomics Complexity**: Creating professional token economics requires deep market knowledge
 - **Lost Context**: Traditional tools don't remember conversation history
@@ -23,6 +27,7 @@ Qognita is a **production-ready AI-powered Web3 intelligence platform** specific
 ### Our Solution
 
 **One intelligent conversational platform** that:
+
 - Analyzes live blockchain data in real-time
 - Detects security risks with AI-powered honeypot detection
 - Generates professional tokenomics using decentralized AI
@@ -39,15 +44,15 @@ graph TB
     C -->|Documentation| E[RAG System]
     C -->|Hybrid| F[Combined Response]
     C -->|General| G[AI Assistant]
-    
+
     D --> H[Solana RPC]
     D --> I[DexScreener API]
     D --> J[Token Analysis]
-    
+
     E --> K[Supabase Vector DB]
     E --> L[Solana Docs]
     E --> M[Anchor Guides]
-    
+
     F --> N[Smart Response]
     G --> N
     J --> N
@@ -57,12 +62,14 @@ graph TB
 ## Key Features
 
 ### **Conversational Memory**
+
 - **Full Context Retention**: Remembers entire conversation history
 - **Natural Follow-ups**: Ask "Any honeypot patterns?" after token analysis
 - **Multi-turn Analysis**: Build complex queries across multiple messages
 - **Context-Aware Responses**: AI understands what you're referring to
 
 ### **Advanced Security Analysis**
+
 - **Honeypot Detection**: AI-powered risk scoring (0-10 scale)
 - **Authority Checks**: Detects active mint/freeze authorities (CRITICAL risks)
 - **Liquidity Analysis**: Identifies low liquidity risks
@@ -71,6 +78,7 @@ graph TB
 - **Comprehensive Reports**: Detailed risk factors with impact explanations
 
 ### **Professional Tokenomics Generation**
+
 - **Powered by Morpheus AI**: Decentralized AI for Web3-native tokenomics
 - **Distribution Models**: Community, team, treasury, liquidity allocations
 - **Vesting Schedules**: Professional time-based release strategies
@@ -79,12 +87,14 @@ graph TB
 - **Risk Analysis**: Comprehensive risk assessment and mitigation strategies
 
 ### **Live Blockchain Integration**
+
 - **Multi-RPC Fallback**: Reliable data fetching across multiple Solana RPC endpoints
 - **Real-time Analysis**: Wallet balances, token holdings, transaction history
 - **Smart Address Classification**: Automatically detects wallets, tokens, programs, transactions
 - **Transaction Parsing**: Detailed instruction-level analysis
 
 ### **Intelligent AI Router**
+
 - **Intent Classification**: Automatically determines query type (blockchain, security, tokenomics)
 - **Tool Selection**: Chooses the right tools from 10+ specialized functions
 - **Graceful Fallbacks**: Handles errors and provides alternative responses
@@ -93,12 +103,14 @@ graph TB
 ## Technical Stack
 
 ### **Frontend**
+
 - **Next.js 14** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
 - **React Markdown** - Rich text rendering
 
 ### **Backend & AI**
+
 - **OpenAI GPT-4o** - Primary language model for intent classification and responses
 - **Morpheus AI** - Decentralized AI for tokenomics generation
 - **Custom AI Router** - Intelligent query routing with conversational memory
@@ -106,12 +118,14 @@ graph TB
 - **Conversational Memory** - Full context retention across messages
 
 ### **Blockchain Integration**
+
 - **@solana/web3.js** - Core Solana interactions
 - **Multiple RPC Providers** - Reliability and rate limit management
 - **DexScreener API** - Token market data
 - **Enhanced Analysis Services** - Security and risk assessment
 
 ### **Data & Storage**
+
 - **Supabase** - PostgreSQL with pgvector for embeddings
 - **Firebase Auth** - User authentication and management
 - **Vector Embeddings** - Semantic document search
@@ -119,10 +133,11 @@ graph TB
 ## Demo Scenarios
 
 ### **Security Analysis with Conversational Memory**
-```
+
+```text
 User: "Analyze token 4Bf3MmVBm94pMcXmnUfWrG95AApZHuEbGoztdGAxpump"
 
-Qognita: 
+Qognita:
 "Token Name: nose
 Total Supply: 1,867,717,053 tokens
 Market Price: $0.0003567
@@ -145,7 +160,8 @@ Recommendation: Exercise extreme caution. Do not invest."
 ```
 
 ### **Professional Tokenomics Generation**
-```
+
+```text
 User: "Generate tokenomics for a Solana DeFi protocol called SolSwap"
 
 Qognita:
@@ -182,18 +198,20 @@ Qognita:
 ```
 
 ### **Wallet Analysis**
-```
+
+```text
 User: "What tokens does wallet 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU hold?"
 
-Qognita: 
+Qognita:
 - Fetches live wallet data
-- Analyzes token holdings with current values  
+- Analyzes token holdings with current values
 - Provides portfolio breakdown
 - Automatically flags risky tokens
 ```
 
 ### **Transaction Analysis**
-```
+
+```text
 User: "Analyze transaction rmDMBs6h39FyX4gnihfv7PNz1k46rknsm5LU4KKbux8..."
 
 Qognita:
@@ -206,6 +224,7 @@ Qognita:
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - OpenAI API key
 - Morpheus API key (get from [mor.org](https://mor.org))
@@ -215,22 +234,26 @@ Qognita:
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/Qognita/qognita
 cd qognita
 ```
 
-2. **Install dependencies**
+1. **Install dependencies**
+
 ```bash
 npm install
 ```
 
-3. **Set up environment variables**
+1. **Set up environment variables**
+
 ```bash
 cp .env.example .env.local
 ```
 
 Fill in your API keys:
+
 ```env
 # Required - OpenAI for AI routing and responses
 OPENAI_API_KEY=your_openai_key
@@ -252,7 +275,8 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_key
 FIREBASE_API_KEY=your_firebase_key
 ```
 
-4. **Start the development server**
+1. **Start the development server**
+
 ```bash
 npm run dev
 ```
@@ -262,20 +286,22 @@ Visit `http://localhost:3000` to see Qognita in action!
 ### Deploy to Vercel
 
 1. **Push to GitHub**
+
 ```bash
 git push origin main
 ```
 
-2. **Connect to Vercel**
+1. **Connect to Vercel**
+
 - Import your repository on [vercel.com](https://vercel.com)
 - Add environment variables (OPENAI_API_KEY, MORPHEUS_API_KEY, etc.)
 - Deploy!
 
-Your Qognita will be live in minutes! 
+Your Qognita will be live in minutes!
 
 ## Project Structure
 
-```
+```text
 src/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes
@@ -304,12 +330,14 @@ src/
 ## Project Highlights
 
 ### **Innovation**
+
 - **First Web3 intelligence platform** with conversational memory
 - **AI-powered honeypot detection** with risk scoring
 - **Decentralized AI tokenomics** using Morpheus
 - **Seamless UX** - complex blockchain queries in natural language
 
 ### **Technical Excellence**
+
 - **Production-ready** - Deployed on Vercel, fully functional
 - **Multi-RPC fallback** for 99.9% uptime
 - **Conversational memory** - Full context retention
@@ -317,12 +345,14 @@ src/
 - **Graceful error handling** and fallbacks
 
 ### **User Impact**
+
 - **Protects users** with automatic security analysis
 - **Empowers creators** with professional tokenomics generation
 - **Lowers barriers** for Solana newcomers
 - **Accelerates decisions** with instant, actionable insights
 
 ### **Scalability**
+
 - **Serverless architecture** on Vercel
 - **Decentralized AI** via Morpheus
 - **Modular design** for easy feature additions
@@ -331,7 +361,7 @@ src/
 ## Future Roadmap
 
 - **Enhanced RAG**: Expand documentation coverage
-- **Multi-Chain**: Possibly extend to Ethereum, Base, Arbitrum 
+- **Multi-Chain**: Possibly extend to Ethereum, Base, Arbitrum
 - **Multi-Agent**: Specialized agents for DeFi, NFTs, Gaming
 - **Analytics Dashboard**: User insights and query optimization
 - **Plugin System**: Custom tools for specific protocols
@@ -349,4 +379,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-[Live Demo](https://qognita.vercel.app) | [Documentation](./FINAL_SUMMARY.md) | [Twitter](https://twitter.com/qognita)
+[Live Demo](https://qognita.vercel.app) | [Documentation](./FINAL_SUMMARY.md) |
+[Twitter](https://twitter.com/qognita)

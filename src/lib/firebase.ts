@@ -1,18 +1,27 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { initializeApp } from 'firebase/app';
+import { getAnalytics } from 'firebase/analytics';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User,
+} from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDfifFMs44jzEGSjb99JNNfjMOb96FZpOI",
-  authDomain: "qognita.firebaseapp.com",
-  projectId: "qognita",
-  storageBucket: "qognita.firebasestorage.app",
-  messagingSenderId: "289912521360",
-  appId: "1:289912521360:web:61290036d1298348a58e15",
-  measurementId: "G-7MS8MBVLLQ"
+  apiKey: 'AIzaSyDfifFMs44jzEGSjb99JNNfjMOb96FZpOI',
+  authDomain: 'qognita.firebaseapp.com',
+  projectId: 'qognita',
+  storageBucket: 'qognita.firebasestorage.app',
+  messagingSenderId: '289912521360',
+  appId: '1:289912521360:web:61290036d1298348a58e15',
+  measurementId: 'G-7MS8MBVLLQ',
 };
 
 // Initialize Firebase
@@ -37,14 +46,17 @@ export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
-    
+
     // Create user document in Firestore
     await createUserDocument(user);
-    
+
     return { user, error: null };
   } catch (error) {
     console.error('Google sign in error:', error);
-    return { user: null, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+    return {
+      user: null,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
   }
 };
 
@@ -52,14 +64,17 @@ export const signUpWithEmail = async (email: string, password: string, displayNa
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     const user = result.user;
-    
+
     // Create user document in Firestore
     await createUserDocument(user, { displayName });
-    
+
     return { user, error: null };
   } catch (error) {
     console.error('Email sign up error:', error);
-    return { user: null, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+    return {
+      user: null,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
   }
 };
 
@@ -69,7 +84,10 @@ export const signInWithEmail = async (email: string, password: string) => {
     return { user: result.user, error: null };
   } catch (error) {
     console.error('Email sign in error:', error);
-    return { user: null, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+    return {
+      user: null,
+      error: error instanceof Error ? error.message : 'An unknown error occurred',
+    };
   }
 };
 
@@ -85,15 +103,17 @@ export const logOut = async () => {
 
 // Create user document in Firestore
 const createUserDocument = async (user: User, additionalData?: any) => {
-  if (!user) return;
-  
+  if (!user) {
+    return;
+  }
+
   const userRef = doc(db, 'users', user.uid);
   const userSnap = await getDoc(userRef);
-  
+
   if (!userSnap.exists()) {
     const { displayName, email, photoURL } = user;
     const createdAt = serverTimestamp();
-    
+
     try {
       await setDoc(userRef, {
         displayName: additionalData?.displayName || displayName,
@@ -103,16 +123,20 @@ const createUserDocument = async (user: User, additionalData?: any) => {
         lastLoginAt: serverTimestamp(),
         analysisCount: 0,
         plan: 'free',
-        ...additionalData
+        ...additionalData,
       });
     } catch (error) {
       console.error('Error creating user document:', error);
     }
   } else {
     // Update last login time
-    await setDoc(userRef, {
-      lastLoginAt: serverTimestamp()
-    }, { merge: true });
+    await setDoc(
+      userRef,
+      {
+        lastLoginAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
   }
 };
 

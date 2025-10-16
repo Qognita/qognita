@@ -1,90 +1,90 @@
-import axios from 'axios'
-import bs58 from 'bs58'
+import axios from 'axios';
+import bs58 from 'bs58';
 
 export interface MorpheusConfig {
-  apiUrl: string
-  apiKey: string
-  modelId?: string
+  apiUrl: string;
+  apiKey: string;
+  modelId?: string;
 }
 
 export interface ParsedAccountData {
-  accountType: string
-  fields: Record<string, any>
-  confidence: number
+  accountType: string;
+  fields: Record<string, any>;
+  confidence: number;
 }
 
 export interface SecurityAnalysisResult {
   risks: Array<{
-    type: string
-    severity: string
-    description: string
-    confidence: number
-  }>
-  trustScore: number
-  analysis: string
+    type: string;
+    severity: string;
+    description: string;
+    confidence: number;
+  }>;
+  trustScore: number;
+  analysis: string;
 }
 
 export class MorpheusService {
-  private config: MorpheusConfig
+  private config: MorpheusConfig;
 
   constructor(config: MorpheusConfig) {
-    this.config = config
+    this.config = config;
   }
 
   async parseAccountData(rawData: Buffer, programId: string): Promise<ParsedAccountData> {
     try {
       // For now, we'll simulate the Morpheus API call
       // In a real implementation, this would call the actual Morpheus API
-      const prompt = this.createParsingPrompt(rawData, programId)
-      
+      const prompt = this.createParsingPrompt(rawData, programId);
+
       const response = await this.callMorpheusAPI('parse', {
         prompt,
         data: rawData.toString('base64'),
-        programId
-      })
+        programId,
+      });
 
-      return response.data
+      return response.data;
     } catch (error) {
-      console.error('Error parsing account data with Morpheus:', error)
-      
+      console.error('Error parsing account data with Morpheus:', error);
+
       // Fallback to basic parsing
-      return this.fallbackParsing(rawData, programId)
+      return this.fallbackParsing(rawData, programId);
     }
   }
 
   async analyzeProgram(programData: any): Promise<SecurityAnalysisResult> {
     try {
-      const prompt = this.createSecurityPrompt(programData)
-      
+      const prompt = this.createSecurityPrompt(programData);
+
       const response = await this.callMorpheusAPI('analyze', {
         prompt,
-        data: programData
-      })
+        data: programData,
+      });
 
-      return response.data
+      return response.data;
     } catch (error) {
-      console.error('Error analyzing program with Morpheus:', error)
-      
+      console.error('Error analyzing program with Morpheus:', error);
+
       // Fallback analysis
-      return this.fallbackSecurityAnalysis(programData)
+      return this.fallbackSecurityAnalysis(programData);
     }
   }
 
   async detectRisks(transactionData: any): Promise<SecurityAnalysisResult> {
     try {
-      const prompt = this.createRiskPrompt(transactionData)
-      
+      const prompt = this.createRiskPrompt(transactionData);
+
       const response = await this.callMorpheusAPI('risk-detect', {
         prompt,
-        data: transactionData
-      })
+        data: transactionData,
+      });
 
-      return response.data
+      return response.data;
     } catch (error) {
-      console.error('Error detecting risks with Morpheus:', error)
-      
+      console.error('Error detecting risks with Morpheus:', error);
+
       // Fallback risk detection
-      return this.fallbackRiskDetection(transactionData)
+      return this.fallbackRiskDetection(transactionData);
     }
   }
 
@@ -94,48 +94,51 @@ export class MorpheusService {
       const messages = [
         {
           role: 'system',
-          content: this.getSystemPrompt(endpoint)
+          content: this.getSystemPrompt(endpoint),
         },
         {
           role: 'user',
-          content: payload.prompt
-        }
-      ]
-
-      const response = await axios.post(`${this.config.apiUrl}/chat/completions`, {
-        model: this.config.modelId || 'mistral-31-24b',
-        messages: messages,
-        stream: false,
-        temperature: 0.7,
-        max_completion_tokens: 2000
-      }, {
-        headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          content: payload.prompt,
         },
-        timeout: 30000 // 30 second timeout
-      })
-      
+      ];
+
+      const response = await axios.post(
+        `${this.config.apiUrl}/chat/completions`,
+        {
+          model: this.config.modelId || 'mistral-31-24b',
+          messages: messages,
+          stream: false,
+          temperature: 0.7,
+          max_completion_tokens: 2000,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.config.apiKey}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          timeout: 30000, // 30 second timeout
+        }
+      );
+
       // Parse the AI response and extract structured data
-      const aiResponse = response.data.choices[0]?.message?.content
-      return this.parseAIResponse(endpoint, aiResponse, payload)
-      
+      const aiResponse = response.data.choices[0]?.message?.content;
+      return this.parseAIResponse(endpoint, aiResponse, payload);
     } catch (error) {
-      console.error(`Morpheus API call failed for ${endpoint}:`, error)
-      
+      console.error(`Morpheus API call failed for ${endpoint}:`, error);
+
       // Fall back to enhanced parsing if API is unavailable
-      console.log(`Falling back to enhanced parsing for ${endpoint}`)
-      
+      console.log(`Falling back to enhanced parsing for ${endpoint}`);
+
       switch (endpoint) {
         case 'parse':
-          return { data: this.simulateParsingResponse(payload) }
+          return { data: this.simulateParsingResponse(payload) };
         case 'analyze':
-          return { data: this.simulateAnalysisResponse(payload) }
+          return { data: this.simulateAnalysisResponse(payload) };
         case 'risk-detect':
-          return { data: this.simulateRiskResponse(payload) }
+          return { data: this.simulateRiskResponse(payload) };
         default:
-          throw new Error(`Unknown endpoint: ${endpoint}`)
+          throw new Error(`Unknown endpoint: ${endpoint}`);
       }
     }
   }
@@ -151,8 +154,8 @@ export class MorpheusService {
           },
           "confidence": number between 0 and 1
         }
-        Be precise and only return valid JSON.`
-        
+        Be precise and only return valid JSON.`;
+
       case 'analyze':
         return `You are a Solana security analyst. Analyze the provided program/account data for security risks and return JSON:
         {
@@ -167,8 +170,8 @@ export class MorpheusService {
           "trustScore": number between 0 and 100,
           "analysis": "detailed analysis string"
         }
-        Only return valid JSON.`
-        
+        Only return valid JSON.`;
+
       case 'risk-detect':
         return `You are a Solana transaction risk detector. Analyze the transaction for suspicious patterns and return JSON:
         {
@@ -183,46 +186,46 @@ export class MorpheusService {
           "trustScore": number between 0 and 100,
           "analysis": "detailed risk analysis string"
         }
-        Only return valid JSON.`
-        
+        Only return valid JSON.`;
+
       default:
-        return 'You are a helpful Solana blockchain analyst.'
+        return 'You are a helpful Solana blockchain analyst.';
     }
   }
 
   private parseAIResponse(endpoint: string, aiResponse: string, originalPayload: any): any {
     try {
       // Try to extract JSON from the AI response
-      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/)
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const parsedResponse = JSON.parse(jsonMatch[0])
-        return { data: parsedResponse }
+        const parsedResponse = JSON.parse(jsonMatch[0]);
+        return { data: parsedResponse };
       } else {
         // If no JSON found, fall back to simulation with enhanced data
-        console.warn('No valid JSON found in AI response, using fallback')
-        throw new Error('Invalid AI response format')
+        console.warn('No valid JSON found in AI response, using fallback');
+        throw new Error('Invalid AI response format');
       }
     } catch (error) {
-      console.error('Error parsing AI response:', error)
-      
+      console.error('Error parsing AI response:', error);
+
       // Enhanced fallback based on real data
       switch (endpoint) {
         case 'parse':
-          return { data: this.simulateParsingResponse(originalPayload) }
+          return { data: this.simulateParsingResponse(originalPayload) };
         case 'analyze':
-          return { data: this.simulateAnalysisResponse(originalPayload) }
+          return { data: this.simulateAnalysisResponse(originalPayload) };
         case 'risk-detect':
-          return { data: this.simulateRiskResponse(originalPayload) }
+          return { data: this.simulateRiskResponse(originalPayload) };
         default:
-          throw error
+          throw error;
       }
     }
   }
 
   private createParsingPrompt(rawData: Buffer, programId: string): string {
-    const hexData = rawData.toString('hex')
-    const dataPreview = hexData.length > 128 ? hexData.substring(0, 128) + '...' : hexData
-    
+    const hexData = rawData.toString('hex');
+    const dataPreview = hexData.length > 128 ? hexData.substring(0, 128) + '...' : hexData;
+
     return `Analyze this Solana account data:
 
 Program ID: ${programId}
@@ -246,7 +249,7 @@ Token Account Structure (165 bytes):
 - Bytes 64-71: Amount (little-endian u64)
 - Byte 108: State (0=uninitialized, 1=initialized, 2=frozen)
 
-Based on the ${rawData.length} byte length, determine if this is a TokenMint or TokenAccount and parse accordingly.`
+Based on the ${rawData.length} byte length, determine if this is a TokenMint or TokenAccount and parse accordingly.`;
   }
 
   private createSecurityPrompt(programData: any): string {
@@ -266,7 +269,7 @@ Look for:
 - Suspicious program interactions
 - Token mint/freeze authority issues
 
-Assess the overall security and trustworthiness.`
+Assess the overall security and trustworthiness.`;
   }
 
   private createRiskPrompt(transactionData: any): string {
@@ -286,57 +289,56 @@ Look for:
 - Rug pull indicators
 - Phishing attempts
 
-Assess the risk level and provide warnings.`
+Assess the risk level and provide warnings.`;
   }
 
   private simulateParsingResponse(payload: any): ParsedAccountData {
     // Parse real blockchain data instead of returning mock data
     try {
-      const data = Buffer.from(payload.data, 'base64')
-      const programId = payload.programId
-      
-      
+      const data = Buffer.from(payload.data, 'base64');
+      const programId = payload.programId;
+
       // Identify account type based on program ID and data structure
       const commonPrograms: Record<string, string> = {
         '11111111111111111111111111111112': 'SystemAccount',
-        'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA': 'TokenProgram',
-        'So1endDq2YkqhipRh3WViPa8hdiSpxWy6z3Z6tMCpAo': 'LendingAccount',
-        'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4': 'JupiterProgram',
-        'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc': 'WhirlpoolProgram'
-      }
+        TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'TokenProgram',
+        So1endDq2YkqhipRh3WViPa8hdiSpxWy6z3Z6tMCpAo: 'LendingAccount',
+        JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4: 'JupiterProgram',
+        whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc: 'WhirlpoolProgram',
+      };
 
-      const programType = commonPrograms[programId] || 'UnknownProgram'
-      
+      const programType = commonPrograms[programId] || 'UnknownProgram';
+
       // For Token Program accounts, determine if it's a mint or token account based on data length
       if (programType === 'TokenProgram') {
         if (data.length === 82) {
           // Token Mint Account (82 bytes) - Enhanced parsing with validation
-          console.log(`🔍 Parsing Token Mint - Data length: ${data.length} bytes`)
-          console.log(`📊 Raw data preview: ${data.subarray(0, 50).toString('hex')}`)
-          
+          console.log(`🔍 Parsing Token Mint - Data length: ${data.length} bytes`);
+          console.log(`📊 Raw data preview: ${data.subarray(0, 50).toString('hex')}`);
+
           try {
             // Let's try the standard SPL Token Mint layout first
             // Standard layout (without COption wrapper):
             // 0-31: mint_authority (32 bytes) - all zeros if None
-            // 32-39: supply (8 bytes) - u64 little endian  
+            // 32-39: supply (8 bytes) - u64 little endian
             // 40: decimals (1 byte) - u8
             // 41: is_initialized (1 byte) - bool
             // 42-73: freeze_authority (32 bytes) - all zeros if None
-            
-            console.log(`🔍 Trying standard SPL Token Mint layout...`)
-            
-            const mintAuthority = data.subarray(0, 32)
-            const supply = data.readBigUInt64LE(32)
-            const decimals = data[40]
-            const isInitialized = data[41] === 1
-            const freezeAuthority = data.subarray(42, 74)
-            
-            console.log(`📊 Standard layout parsing:`)
-            console.log(`  Supply: ${supply.toString()}`)
-            console.log(`  Decimals: ${decimals}`)
-            console.log(`  IsInitialized: ${isInitialized}`)
-            console.log(`  Supply hex: ${data.subarray(32, 40).toString('hex')}`)
-            
+
+            console.log(`🔍 Trying standard SPL Token Mint layout...`);
+
+            const mintAuthority = data.subarray(0, 32);
+            const supply = data.readBigUInt64LE(32);
+            const decimals = data[40];
+            const isInitialized = data[41] === 1;
+            const freezeAuthority = data.subarray(42, 74);
+
+            console.log(`📊 Standard layout parsing:`);
+            console.log(`  Supply: ${supply.toString()}`);
+            console.log(`  Decimals: ${decimals}`);
+            console.log(`  IsInitialized: ${isInitialized}`);
+            console.log(`  Supply hex: ${data.subarray(32, 40).toString('hex')}`);
+
             // If this doesn't match RPC, try the COption layout
             // COption layout:
             // 0-3: mint_authority option (4 bytes)
@@ -346,47 +348,59 @@ Assess the risk level and provide warnings.`
             // 45: is_initialized (1 byte)
             // 46-49: freeze_authority option (4 bytes)
             // 50-81: freeze_authority pubkey (32 bytes)
-            
-            const altMintAuthorityOption = data.readUInt32LE(0)
-            const altMintAuthority = altMintAuthorityOption === 1 ? data.subarray(4, 36) : null
-            const altSupply = data.readBigUInt64LE(36)
-            const altDecimals = data[44]
-            const altIsInitialized = data[45] === 1
-            const altFreezeAuthorityOption = data.readUInt32LE(46)
-            const altFreezeAuthority = altFreezeAuthorityOption === 1 ? data.subarray(50, 82) : null
-            
-            console.log(`📊 COption layout parsing:`)
-            console.log(`  Supply: ${altSupply.toString()}`)
-            console.log(`  Decimals: ${altDecimals}`)
-            console.log(`  IsInitialized: ${altIsInitialized}`)
-            console.log(`  Supply hex: ${data.subarray(36, 44).toString('hex')}`)
-            
+
+            const altMintAuthorityOption = data.readUInt32LE(0);
+            const altMintAuthority = altMintAuthorityOption === 1 ? data.subarray(4, 36) : null;
+            const altSupply = data.readBigUInt64LE(36);
+            const altDecimals = data[44];
+            const altIsInitialized = data[45] === 1;
+            const altFreezeAuthorityOption = data.readUInt32LE(46);
+            const altFreezeAuthority =
+              altFreezeAuthorityOption === 1 ? data.subarray(50, 82) : null;
+
+            console.log(`📊 COption layout parsing:`);
+            console.log(`  Supply: ${altSupply.toString()}`);
+            console.log(`  Decimals: ${altDecimals}`);
+            console.log(`  IsInitialized: ${altIsInitialized}`);
+            console.log(`  Supply hex: ${data.subarray(36, 44).toString('hex')}`);
+
             // Use whichever layout seems more reasonable (we'll compare with expected values)
-            const useStandardLayout = true // We'll determine this based on the data
-            
-            const finalSupply = useStandardLayout ? supply : altSupply
-            const finalDecimals = useStandardLayout ? decimals : altDecimals
-            const finalIsInitialized = useStandardLayout ? isInitialized : altIsInitialized
-            const finalMintAuthority = useStandardLayout ? mintAuthority : altMintAuthority
-            const finalFreezeAuthority = useStandardLayout ? freezeAuthority : altFreezeAuthority
-            
+            const useStandardLayout = true; // We'll determine this based on the data
+
+            const finalSupply = useStandardLayout ? supply : altSupply;
+            const finalDecimals = useStandardLayout ? decimals : altDecimals;
+            const finalIsInitialized = useStandardLayout ? isInitialized : altIsInitialized;
+            const finalMintAuthority = useStandardLayout ? mintAuthority : altMintAuthority;
+            const finalFreezeAuthority = useStandardLayout ? freezeAuthority : altFreezeAuthority;
+
             // Validate the parsed data
             if (decimals > 18) {
-              console.warn(`⚠️ Unusual decimals value: ${decimals}`)
+              console.warn(`⚠️ Unusual decimals value: ${decimals}`);
             }
-            
+
             const parsedResult = {
               accountType: 'TokenMint',
               fields: {
-                mintAuthority: finalMintAuthority ? (this.isNullKey(finalMintAuthority) ? null : this.bufferToBase58(finalMintAuthority)) : null,
+                mintAuthority: finalMintAuthority
+                  ? this.isNullKey(finalMintAuthority)
+                    ? null
+                    : this.bufferToBase58(finalMintAuthority)
+                  : null,
                 supply: finalSupply.toString(),
                 decimals: finalDecimals,
                 isInitialized: finalIsInitialized,
-                freezeAuthority: finalFreezeAuthority ? (this.isNullKey(finalFreezeAuthority) ? null : this.bufferToBase58(finalFreezeAuthority)) : null,
+                freezeAuthority: finalFreezeAuthority
+                  ? this.isNullKey(finalFreezeAuthority)
+                    ? null
+                    : this.bufferToBase58(finalFreezeAuthority)
+                  : null,
                 // Add calculated fields for better accuracy
-                totalSupply: finalDecimals <= 18 ? (Number(finalSupply) / Math.pow(10, finalDecimals)).toString() : 'Too large to calculate',
+                totalSupply:
+                  finalDecimals <= 18
+                    ? (Number(finalSupply) / Math.pow(10, finalDecimals)).toString()
+                    : 'Too large to calculate',
                 rawSupply: finalSupply.toString(),
-                dataLength: data.length
+                dataLength: data.length,
               },
               confidence: 0.98,
               debug: {
@@ -396,33 +410,32 @@ Assess the risk level and provide warnings.`
                 standardSupplyHex: data.subarray(32, 40).toString('hex'),
                 coptionSupplyHex: data.subarray(36, 44).toString('hex'),
                 decimalsHex: data[40].toString(16),
-                layoutUsed: useStandardLayout ? 'standard' : 'coption'
-              }
-            }
-            
-            console.log('✅ Morpheus Token Mint Analysis:', parsedResult)
-            return parsedResult
-            
+                layoutUsed: useStandardLayout ? 'standard' : 'coption',
+              },
+            };
+
+            console.log('✅ Morpheus Token Mint Analysis:', parsedResult);
+            return parsedResult;
           } catch (error) {
-            console.error('❌ Error parsing token mint:', error)
+            console.error('❌ Error parsing token mint:', error);
             return {
               accountType: 'TokenMintParseError',
               fields: {
                 error: `Failed to parse token mint: ${error}`,
                 dataLength: data.length,
-                rawDataPreview: data.subarray(0, Math.min(32, data.length)).toString('hex')
+                rawDataPreview: data.subarray(0, Math.min(32, data.length)).toString('hex'),
               },
-              confidence: 0.1
-            }
+              confidence: 0.1,
+            };
           }
         } else if (data.length >= 165) {
           // Parse SPL Token Account structure (165 bytes)
-          const mint = data.subarray(0, 32)
-          const owner = data.subarray(32, 64)
-          const amount = data.readBigUInt64LE(64)
-          const delegateOption = data[72]
-          const state = data[108]
-          
+          const mint = data.subarray(0, 32);
+          const owner = data.subarray(32, 64);
+          const amount = data.readBigUInt64LE(64);
+          const delegateOption = data[72];
+          const state = data[108];
+
           return {
             accountType: 'TokenAccount',
             fields: {
@@ -434,10 +447,10 @@ Assess the risk level and provide warnings.`
               delegate: delegateOption === 1 ? this.bufferToBase58(data.subarray(76, 108)) : null,
               isNative: data.readBigUInt64LE(109) > 0n,
               delegatedAmount: delegateOption === 1 ? data.readBigUInt64LE(117).toString() : '0',
-              closeAuthority: data[125] === 1 ? this.bufferToBase58(data.subarray(129, 161)) : null
+              closeAuthority: data[125] === 1 ? this.bufferToBase58(data.subarray(129, 161)) : null,
             },
-            confidence: 0.95
-          }
+            confidence: 0.95,
+          };
         } else {
           // Unknown token program account
           return {
@@ -445,10 +458,13 @@ Assess the risk level and provide warnings.`
             fields: {
               programId: programId,
               dataLength: data.length,
-              dataPreview: data.length > 0 ? data.subarray(0, Math.min(32, data.length)).toString('hex') : 'No data'
+              dataPreview:
+                data.length > 0
+                  ? data.subarray(0, Math.min(32, data.length)).toString('hex')
+                  : 'No data',
             },
-            confidence: 0.5
-          }
+            confidence: 0.5,
+          };
         }
       } else if (programType === 'SystemAccount') {
         return {
@@ -457,10 +473,10 @@ Assess the risk level and provide warnings.`
             lamports: 'See account balance',
             owner: 'System Program',
             executable: false,
-            rentEpoch: 'Current epoch'
+            rentEpoch: 'Current epoch',
           },
-          confidence: 1.0
-        }
+          confidence: 1.0,
+        };
       } else {
         // Generic program account
         return {
@@ -468,33 +484,36 @@ Assess the risk level and provide warnings.`
           fields: {
             programId: programId,
             dataLength: data.length,
-            dataPreview: data.length > 0 ? data.subarray(0, Math.min(32, data.length)).toString('hex') : 'No data',
+            dataPreview:
+              data.length > 0
+                ? data.subarray(0, Math.min(32, data.length)).toString('hex')
+                : 'No data',
             owner: programId,
-            executable: false
+            executable: false,
           },
-          confidence: 0.7
-        }
+          confidence: 0.7,
+        };
       }
     } catch (error) {
-      console.error('Error parsing account data:', error)
+      console.error('Error parsing account data:', error);
       return {
         accountType: 'ParseError',
         fields: {
           error: 'Failed to parse account data',
-          programId: payload.programId || 'Unknown'
+          programId: payload.programId || 'Unknown',
         },
-        confidence: 0.1
-      }
+        confidence: 0.1,
+      };
     }
   }
 
   private bufferToBase58(buffer: Buffer): string {
-    return bs58.encode(buffer)
+    return bs58.encode(buffer);
   }
 
   private isNullKey(buffer: Buffer): boolean {
     // Check if all bytes are zero (null key)
-    return buffer.every(byte => byte === 0)
+    return buffer.every((byte) => byte === 0);
   }
 
   private simulateAnalysisResponse(payload: any): SecurityAnalysisResult {
@@ -504,12 +523,13 @@ Assess the risk level and provide warnings.`
           type: 'UPGRADE_AUTHORITY',
           severity: 'MEDIUM',
           description: 'Program has an upgrade authority that could modify the code',
-          confidence: 0.9
-        }
+          confidence: 0.9,
+        },
       ],
       trustScore: 75,
-      analysis: 'This program appears to be legitimate but has some centralization risks due to upgrade authority.'
-    }
+      analysis:
+        'This program appears to be legitimate but has some centralization risks due to upgrade authority.',
+    };
   }
 
   private simulateRiskResponse(payload: any): SecurityAnalysisResult {
@@ -519,12 +539,12 @@ Assess the risk level and provide warnings.`
           type: 'UNUSUAL_TRANSFER',
           severity: 'LOW',
           description: 'Transaction involves multiple token transfers',
-          confidence: 0.6
-        }
+          confidence: 0.6,
+        },
       ],
       trustScore: 80,
-      analysis: 'Transaction appears normal with minor complexity flags.'
-    }
+      analysis: 'Transaction appears normal with minor complexity flags.',
+    };
   }
 
   private fallbackParsing(rawData: Buffer, programId: string): ParsedAccountData {
@@ -532,35 +552,39 @@ Assess the risk level and provide warnings.`
       accountType: 'Unknown',
       fields: {
         dataLength: rawData.length,
-        programId
+        programId,
       },
-      confidence: 0.1
-    }
+      confidence: 0.1,
+    };
   }
 
   private fallbackSecurityAnalysis(programData: any): SecurityAnalysisResult {
     return {
-      risks: [{
-        type: 'ANALYSIS_UNAVAILABLE',
-        severity: 'LOW',
-        description: 'Unable to perform detailed security analysis',
-        confidence: 1.0
-      }],
+      risks: [
+        {
+          type: 'ANALYSIS_UNAVAILABLE',
+          severity: 'LOW',
+          description: 'Unable to perform detailed security analysis',
+          confidence: 1.0,
+        },
+      ],
       trustScore: 50,
-      analysis: 'Basic analysis only - detailed AI analysis unavailable.'
-    }
+      analysis: 'Basic analysis only - detailed AI analysis unavailable.',
+    };
   }
 
   private fallbackRiskDetection(transactionData: any): SecurityAnalysisResult {
     return {
-      risks: [{
-        type: 'RISK_DETECTION_UNAVAILABLE',
-        severity: 'LOW',
-        description: 'Unable to perform detailed risk detection',
-        confidence: 1.0
-      }],
+      risks: [
+        {
+          type: 'RISK_DETECTION_UNAVAILABLE',
+          severity: 'LOW',
+          description: 'Unable to perform detailed risk detection',
+          confidence: 1.0,
+        },
+      ],
       trustScore: 50,
-      analysis: 'Basic risk assessment only - detailed AI analysis unavailable.'
-    }
+      analysis: 'Basic risk assessment only - detailed AI analysis unavailable.',
+    };
   }
 }

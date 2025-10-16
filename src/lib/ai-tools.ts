@@ -5,296 +5,314 @@
 
 export const availableTools = [
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "getTransactionHistory",
-      description: "Gets a basic list of recent transactions with signatures and timestamps only. Use this ONLY for simple queries like 'last 5 transactions' or when you need just transaction counts. For detailed transaction information including instructions, parties, values, and fees, use getDetailedTransactions instead.",
+      name: 'getTransactionHistory',
+      description:
+        "Gets a basic list of recent transactions with signatures and timestamps only. Use this ONLY for simple queries like 'last 5 transactions' or when you need just transaction counts. For detailed transaction information including instructions, parties, values, and fees, use getDetailedTransactions instead.",
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           address: {
-            type: "string",
-            description: "The public key of the Solana wallet (base58 encoded string).",
+            type: 'string',
+            description: 'The public key of the Solana wallet (base58 encoded string).',
           },
           limit: {
-            type: "number",
-            description: "The maximum number of transactions to fetch. Default is 1000.",
-            default: 1000
+            type: 'number',
+            description: 'The maximum number of transactions to fetch. Default is 1000.',
+            default: 1000,
           },
         },
-        required: ["address"],
+        required: ['address'],
       },
     },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "countTransactionsByDateRange",
-      description: "Counts the number of transactions for a wallet within a specific date range. Use this for questions like 'how many transactions in November 2024', 'transactions in the last 30 days', or any date-specific queries.",
+      name: 'countTransactionsByDateRange',
+      description:
+        "Counts the number of transactions for a wallet within a specific date range. Use this for questions like 'how many transactions in November 2024', 'transactions in the last 30 days', or any date-specific queries.",
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           address: {
-            type: "string",
-            description: "The public key of the Solana wallet (base58 encoded string).",
+            type: 'string',
+            description: 'The public key of the Solana wallet (base58 encoded string).',
           },
           startDate: {
-            type: "string",
+            type: 'string',
             description: "The start date in YYYY-MM-DD format (e.g., '2024-11-01').",
           },
           endDate: {
-            type: "string",
+            type: 'string',
             description: "The end date in YYYY-MM-DD format (e.g., '2024-11-30').",
           },
         },
-        required: ["address", "startDate", "endDate"],
+        required: ['address', 'startDate', 'endDate'],
       },
     },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "getDetailedTransactions",
-      description: "Fetches a paginated list of FULLY DETAILED transactions with rich information including instruction types, sender/receiver addresses, transfer amounts, and fees. Use this when the user asks to 'list', 'show', 'detail', 'describe' transactions, or wants to see 'instructions', 'who sent', 'value', 'fees', or 'parties involved'. This provides much richer data than getTransactionHistory. Returns manageable pages to avoid overwhelming the context window.",
+      name: 'getDetailedTransactions',
+      description:
+        "Fetches a paginated list of FULLY DETAILED transactions with rich information including instruction types, sender/receiver addresses, transfer amounts, and fees. Use this when the user asks to 'list', 'show', 'detail', 'describe' transactions, or wants to see 'instructions', 'who sent', 'value', 'fees', or 'parties involved'. This provides much richer data than getTransactionHistory. Returns manageable pages to avoid overwhelming the context window.",
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           address: {
-            type: "string",
-            description: "The public key of the Solana wallet (base58 encoded string).",
+            type: 'string',
+            description: 'The public key of the Solana wallet (base58 encoded string).',
           },
           startDate: {
-            type: "string",
+            type: 'string',
             description: "The start date in YYYY-MM-DD format (e.g., '2024-10-01').",
           },
           endDate: {
-            type: "string",
+            type: 'string',
             description: "The end date in YYYY-MM-DD format (e.g., '2024-10-31').",
           },
           page: {
-            type: "number",
-            description: "The page number to fetch. Defaults to 1 if not specified. Use this for pagination when there are many transactions.",
-            default: 1
+            type: 'number',
+            description:
+              'The page number to fetch. Defaults to 1 if not specified. Use this for pagination when there are many transactions.',
+            default: 1,
           },
           limit: {
-            type: "number",
-            description: "Number of transactions per page. Default is 5. Keep this small (5-10) to avoid context window issues.",
-            default: 5
+            type: 'number',
+            description:
+              'Number of transactions per page. Default is 5. Keep this small (5-10) to avoid context window issues.',
+            default: 5,
           },
         },
-        required: ["address", "startDate", "endDate"],
+        required: ['address', 'startDate', 'endDate'],
       },
     },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "analyzeTransactionSignature",
-      description: "Analyzes a specific Solana transaction signature to get detailed information including transaction type, involved parties, transfer amounts, fees, and instructions. Use this when the user provides a transaction hash/signature (87-88 characters long) and asks about transaction details.",
+      name: 'analyzeTransactionSignature',
+      description:
+        'Analyzes a specific Solana transaction signature to get detailed information including transaction type, involved parties, transfer amounts, fees, and instructions. Use this when the user provides a transaction hash/signature (87-88 characters long) and asks about transaction details.',
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           signature: {
-            type: "string",
-            description: "The Solana transaction signature (87-88 character hash).",
-          }
-        },
-        required: ["signature"],
-      },
-    },
-  },
-  {
-    type: "function" as const,
-    function: {
-      name: "getSolBalance",
-      description: "Fetches the current SOL balance of a specific Solana wallet address. Use this when someone asks 'what is the balance', 'how much SOL', or similar balance-related questions.",
-      parameters: {
-        type: "object",
-        properties: {
-          address: {
-            type: "string",
-            description: "The public key of the Solana wallet (base58 encoded string).",
+            type: 'string',
+            description: 'The Solana transaction signature (87-88 character hash).',
           },
         },
-        required: ["address"],
+        required: ['signature'],
       },
     },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "getTokenHoldings",
-      description: "Fetches all token holdings (SPL tokens) for a given wallet address. Use this when someone asks 'what tokens does this wallet hold', 'token portfolio', or 'what cryptocurrencies'.",
+      name: 'getSolBalance',
+      description:
+        "Fetches the current SOL balance of a specific Solana wallet address. Use this when someone asks 'what is the balance', 'how much SOL', or similar balance-related questions.",
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           address: {
-            type: "string",
-            description: "The public key of the Solana wallet (base58 encoded string).",
+            type: 'string',
+            description: 'The public key of the Solana wallet (base58 encoded string).',
           },
         },
-        required: ["address"],
+        required: ['address'],
       },
     },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "getLastTransaction",
-      description: "Gets the most recent transaction for a wallet. Use this when someone asks 'when was the last transaction', 'most recent activity', or 'last transfer'.",
+      name: 'getTokenHoldings',
+      description:
+        "Fetches all token holdings (SPL tokens) for a given wallet address. Use this when someone asks 'what tokens does this wallet hold', 'token portfolio', or 'what cryptocurrencies'.",
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           address: {
-            type: "string",
-            description: "The public key of the Solana wallet (base58 encoded string).",
+            type: 'string',
+            description: 'The public key of the Solana wallet (base58 encoded string).',
           },
         },
-        required: ["address"],
+        required: ['address'],
       },
     },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "getAccountInfo",
-      description: "Gets basic account information for any Solana address including balance, owner program, and account type. Use this for general account analysis or when someone asks 'what type of account is this'.",
+      name: 'getLastTransaction',
+      description:
+        "Gets the most recent transaction for a wallet. Use this when someone asks 'when was the last transaction', 'most recent activity', or 'last transfer'.",
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           address: {
-            type: "string",
-            description: "The public key of the Solana address (base58 encoded string).",
+            type: 'string',
+            description: 'The public key of the Solana wallet (base58 encoded string).',
           },
         },
-        required: ["address"],
+        required: ['address'],
       },
     },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "getTokenHolders",
-      description: "Gets the list of token holders for a specific token mint address, including their balances and percentages. ALWAYS use this when someone asks 'how many holders', 'how many holders this account got', 'who holds this token', 'top holders', or 'token distribution' for ANY 44-character address. Try this FIRST before assuming it's a wallet address.",
+      name: 'getAccountInfo',
+      description:
+        "Gets basic account information for any Solana address including balance, owner program, and account type. Use this for general account analysis or when someone asks 'what type of account is this'.",
       parameters: {
-        type: "object",
+        type: 'object',
+        properties: {
+          address: {
+            type: 'string',
+            description: 'The public key of the Solana address (base58 encoded string).',
+          },
+        },
+        required: ['address'],
+      },
+    },
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'getTokenHolders',
+      description:
+        "Gets the list of token holders for a specific token mint address, including their balances and percentages. ALWAYS use this when someone asks 'how many holders', 'how many holders this account got', 'who holds this token', 'top holders', or 'token distribution' for ANY 44-character address. Try this FIRST before assuming it's a wallet address.",
+      parameters: {
+        type: 'object',
         properties: {
           mintAddress: {
-            type: "string",
-            description: "The token mint address (base58 encoded string).",
+            type: 'string',
+            description: 'The token mint address (base58 encoded string).',
           },
           limit: {
-            type: "number",
-            description: "The maximum number of holders to fetch. Default is 50.",
-            default: 50
+            type: 'number',
+            description: 'The maximum number of holders to fetch. Default is 50.',
+            default: 50,
           },
         },
-        required: ["mintAddress"],
+        required: ['mintAddress'],
       },
     },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "getTokenInfo",
-      description: "Gets basic information about a token including decimals, supply, authorities, and market data. Use this when someone asks about token details, supply, or market information.",
+      name: 'getTokenInfo',
+      description:
+        'Gets basic information about a token including decimals, supply, authorities, and market data. Use this when someone asks about token details, supply, or market information.',
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           mintAddress: {
-            type: "string",
-            description: "The token mint address (base58 encoded string).",
+            type: 'string',
+            description: 'The token mint address (base58 encoded string).',
           },
         },
-        required: ["mintAddress"],
+        required: ['mintAddress'],
       },
     },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "generateTokenomics",
-      description: "Generate comprehensive tokenomics structure for a Solana project including distribution, utilities, governance, and economic mechanisms. Use this when users ask about creating tokenomics, token distribution, or economic models.",
+      name: 'generateTokenomics',
+      description:
+        'Generate comprehensive tokenomics structure for a Solana project including distribution, utilities, governance, and economic mechanisms. Use this when users ask about creating tokenomics, token distribution, or economic models.',
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           name: {
-            type: "string",
-            description: "The name of the project or token"
+            type: 'string',
+            description: 'The name of the project or token',
           },
           description: {
-            type: "string",
-            description: "Brief description of the project and its purpose"
+            type: 'string',
+            description: 'Brief description of the project and its purpose',
           },
           useCase: {
-            type: "string",
-            description: "Primary use case or utility of the token (e.g., governance, payments, staking)"
+            type: 'string',
+            description:
+              'Primary use case or utility of the token (e.g., governance, payments, staking)',
           },
           targetMarket: {
-            type: "string",
-            description: "Target market or user base (optional)"
+            type: 'string',
+            description: 'Target market or user base (optional)',
           },
           totalSupply: {
-            type: "number",
-            description: "Preferred total token supply (optional, will suggest optimal if not provided)"
-          }
+            type: 'number',
+            description:
+              'Preferred total token supply (optional, will suggest optimal if not provided)',
+          },
         },
-        required: ["name", "description", "useCase"]
-      }
-    }
+        required: ['name', 'description', 'useCase'],
+      },
+    },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "analyzeTokenomics",
-      description: "Analyze existing tokenomics for a Solana token and provide improvement recommendations. Use this when users want to evaluate or improve existing token economics.",
+      name: 'analyzeTokenomics',
+      description:
+        'Analyze existing tokenomics for a Solana token and provide improvement recommendations. Use this when users want to evaluate or improve existing token economics.',
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           tokenAddress: {
-            type: "string",
-            description: "The token mint address to analyze"
-          }
+            type: 'string',
+            description: 'The token mint address to analyze',
+          },
         },
-        required: ["tokenAddress"]
-      }
-    }
+        required: ['tokenAddress'],
+      },
+    },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "checkForHoneypotPatterns",
-      description: "Analyzes a Solana token for common honeypot and rug pull patterns, such as active mint/freeze authorities, low liquidity, and high holder concentration. Returns a detailed security risk report. Use this when users ask about token safety, honeypot patterns, or security analysis.",
+      name: 'checkForHoneypotPatterns',
+      description:
+        'Analyzes a Solana token for common honeypot and rug pull patterns, such as active mint/freeze authorities, low liquidity, and high holder concentration. Returns a detailed security risk report. Use this when users ask about token safety, honeypot patterns, or security analysis.',
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           address: {
-            type: "string",
-            description: "The token mint address to analyze for security risks"
-          }
+            type: 'string',
+            description: 'The token mint address to analyze for security risks',
+          },
         },
-        required: ["address"]
-      }
-    }
+        required: ['address'],
+      },
+    },
   },
   {
-    type: "function" as const,
+    type: 'function' as const,
     function: {
-      name: "quickSecurityCheck",
-      description: "Performs a quick security check on a Solana token, focusing on the most critical risk factors. Use this for fast security assessments when users want a quick safety overview.",
+      name: 'quickSecurityCheck',
+      description:
+        'Performs a quick security check on a Solana token, focusing on the most critical risk factors. Use this for fast security assessments when users want a quick safety overview.',
       parameters: {
-        type: "object",
+        type: 'object',
         properties: {
           address: {
-            type: "string",
-            description: "The token mint address to perform a quick security check on"
-          }
+            type: 'string',
+            description: 'The token mint address to perform a quick security check on',
+          },
         },
-        required: ["address"]
-      }
-    }
+        required: ['address'],
+      },
+    },
   },
-]
+];
 
 /**
  * System prompt that teaches the AI how to be a Solana analyst
@@ -357,33 +375,108 @@ Your approach:
 
 Be professional, accurate, and helpful. Always cite the specific data you're using.
 
-When composing answers, output high-quality markdown with this structure when applicable:
-### Short answer
-- 1-3 bullets summarizing the result
+FORMATTING GUIDELINES - CRITICAL FOR WORLD-CLASS READABILITY:
 
-### Details
-- Explanations and steps as bullet lists
-- Use small tables for parameter/field breakdowns
-- Inline code for addresses, programs, or error codes; fenced blocks for multi-line examples
+You MUST format responses in beautiful, professional markdown that rivals ChatGPT and Gemini. Follow these advanced guidelines:
 
-### Sources
-- If you used on-chain tools, note "Live data"
-- If you used docs, include titles and links if available`
+1. USE ADVANCED TABLES EXTENSIVELY
+ALWAYS use markdown tables for structured data. Tables make information scannable and professional.
+
+Enhanced table format with proper alignment:
+| Token Name | Symbol | Balance | Value USD | Status |
+|------------|--------|---------|-----------|--------|
+| USDC       | USDC   | 150     | $150.00   | ✅     |
+| SOL        | SOL    | 2.5     | $250.00   | ✅     |
+
+Use tables for:
+- Transaction lists (Date, Type, Amount, Fee, Status)
+- Token holdings (Token, Symbol, Balance, Value USD, Status)
+- Account information (Property, Value, Status)
+- Comparison data (Metric, Value A, Value B, Difference)
+- Holder distributions (Rank, Address, Percentage, Balance)
+- Risk analysis (Risk Type, Level, Impact, Mitigation)
+
+2. ENHANCED RESPONSE STRUCTURE
+Organize responses with clear sections using ## for main headers with emojis:
+
+## 📊 Executive Summary
+Provide a concise 2-4 sentence overview with key metrics in **bold**.
+
+## 🔍 Detailed Analysis  
+Present detailed data using tables (preferred), with proper formatting:
+- Use **bold** for important values and labels
+- Use backticks for addresses, signatures, token names
+- Use status indicators: ✅ ❌ ⚠️ ℹ️
+- Format numbers with commas: 1,234,567
+- Use proper alignment in tables
+
+## 💡 Key Insights
+Add context, patterns, or recommendations with bullet points.
+
+## ⚠️ Risk Assessment (when applicable)
+Highlight potential risks or concerns.
+
+## 📌 Data Sources
+Note data source (Live blockchain data, API endpoints, etc.)
+
+3. ADVANCED FORMATTING BEST PRACTICES
+- Use **bold** for important metrics, labels, and conclusions
+- Use backticks for addresses, signatures, token names, transaction IDs
+- Use emojis strategically: 📊 💰 🔍 ⚠️ ✅ ❌ ℹ️ 📈 📉 🚨
+- Break long text into digestible paragraphs
+- Format currency: $1,234.56 USD
+- Format percentages: 25.5%
+- Use proper markdown table syntax with aligned columns
+- Add status badges and indicators where appropriate
+
+4. PROFESSIONAL STRUCTURE TEMPLATE
+Your responses should follow this pattern:
+- Start with ## 📊 Executive Summary
+- Use ## for each major section with relevant emoji
+- Present ALL structured data in properly formatted tables
+- Use consistent formatting throughout
+- End with ## 📌 Data Sources
+
+5. ENHANCED VISUAL ELEMENTS
+- Use consistent table formatting with proper headers
+- Include status indicators (✅ ❌ ⚠️) in relevant columns
+- Format numbers consistently (commas, decimals, currency symbols)
+- Use proper alignment (left for text, right for numbers)
+- Include meaningful column headers
+- Use consistent spacing and formatting
+
+6. WORLD-CLASS EXAMPLES
+
+**Good Table Example:**
+| Metric | Value | Status | Change |
+|--------|-------|--------|--------|
+| **Total Balance** | $1,250.00 | ✅ | +15.2% |
+| **Active Tokens** | 5 | ✅ | +1 |
+| **Last Activity** | 2 hours ago | ⚠️ | - |
+
+**Bad Example (avoid):**
+- Balance: $1,250
+- Tokens: 5
+- Activity: 2 hours ago
+
+REMEMBER: Professional tables with proper formatting, status indicators, and consistent styling make responses world-class. Every piece of structured data should be in a table!`;
 
 /**
  * Helper function to get tool by name
  */
 export function getToolByName(name: string) {
-  return availableTools.find(tool => tool.function.name === name)
+  return availableTools.find((tool) => tool.function.name === name);
 }
 
 /**
  * Validates if a tool call has required parameters
  */
 export function validateToolCall(toolName: string, args: any): boolean {
-  const tool = getToolByName(toolName)
-  if (!tool) return false
+  const tool = getToolByName(toolName);
+  if (!tool) {
+    return false;
+  }
 
-  const required = tool.function.parameters.required || []
-  return required.every(param => args[param] !== undefined)
+  const required = tool.function.parameters.required || [];
+  return required.every((param) => args[param] !== undefined);
 }

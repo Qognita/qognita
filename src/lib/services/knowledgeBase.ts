@@ -2,50 +2,50 @@
 
 // Types for our knowledge base
 export interface DocumentChunk {
-  id: string
-  content: string
-  source: string
-  url: string
-  title: string
-  embedding?: number[]
-  metadata?: Record<string, any>
+  id: string;
+  content: string;
+  source: string;
+  url: string;
+  title: string;
+  embedding?: number[];
+  metadata?: Record<string, any>;
 }
 
 export interface SearchResult {
-  chunk: DocumentChunk
-  similarity: number
+  chunk: DocumentChunk;
+  similarity: number;
 }
 
 export class SolanaKnowledgeBase {
-  private supabase: any
-  private openaiApiKey: string
+  private supabase: any;
+  private openaiApiKey: string;
 
   constructor() {
     // Initialize Supabase client (we'll set this up)
-    this.supabase = null // Will be initialized when we set up Supabase
-    this.openaiApiKey = process.env.OPENAI_API_KEY || ''
+    this.supabase = null; // Will be initialized when we set up Supabase
+    this.openaiApiKey = process.env.OPENAI_API_KEY || '';
   }
 
   /**
    * Scrape and process Solana documentation
    */
   async scrapeDocumentation(): Promise<DocumentChunk[]> {
-    console.log('🔍 Starting documentation scraping...')
-    
+    console.log('🔍 Starting documentation scraping...');
+
     const sources = [
       {
         name: 'Solana Cookbook',
         baseUrl: 'https://solanacookbook.com',
         paths: [
           '/core-concepts/accounts',
-          '/core-concepts/programs', 
+          '/core-concepts/programs',
           '/core-concepts/transactions',
           '/core-concepts/pdas',
           '/references/keypairs-and-wallets',
           '/references/basic-transactions',
           '/references/token',
-          '/references/nfts'
-        ]
+          '/references/nfts',
+        ],
       },
       {
         name: 'Anchor Book',
@@ -55,35 +55,34 @@ export class SolanaKnowledgeBase {
           '/getting_started/installation.html',
           '/chapter_2/hello_world.html',
           '/chapter_3/milestone_project_tic-tac-toe.html',
-          '/chapter_4/errors.html'
-        ]
-      }
-    ]
+          '/chapter_4/errors.html',
+        ],
+      },
+    ];
 
-    const chunks: DocumentChunk[] = []
+    const chunks: DocumentChunk[] = [];
 
     for (const source of sources) {
       for (const path of source.paths) {
         try {
-          const url = `${source.baseUrl}${path}`
-          console.log(`📄 Scraping: ${url}`)
-          
+          const url = `${source.baseUrl}${path}`;
+          console.log(`📄 Scraping: ${url}`);
+
           // In a real implementation, we'd use a web scraper like Puppeteer
           // For now, we'll create mock data structure
-          const mockContent = await this.mockScrapeContent(url, source.name)
-          
+          const mockContent = await this.mockScrapeContent(url, source.name);
+
           // Chunk the content into smaller pieces
-          const contentChunks = this.chunkContent(mockContent, url, source.name)
-          chunks.push(...contentChunks)
-          
+          const contentChunks = this.chunkContent(mockContent, url, source.name);
+          chunks.push(...contentChunks);
         } catch (error) {
-          console.warn(`Failed to scrape ${source.baseUrl}${path}:`, error)
+          console.warn(`Failed to scrape ${source.baseUrl}${path}:`, error);
         }
       }
     }
 
-    console.log(`✅ Scraped ${chunks.length} document chunks`)
-    return chunks
+    console.log(`✅ Scraped ${chunks.length} document chunks`);
+    return chunks;
   }
 
   /**
@@ -92,7 +91,7 @@ export class SolanaKnowledgeBase {
   private async mockScrapeContent(url: string, sourceName: string): Promise<string> {
     // This would be replaced with actual web scraping
     // For now, return relevant Solana documentation content
-    
+
     if (url.includes('accounts')) {
       return `
         # Accounts in Solana
@@ -112,9 +111,9 @@ export class SolanaKnowledgeBase {
         2. **Program Accounts**: Executable accounts containing program code
         3. **Data Accounts**: Non-executable accounts that store data
         4. **Associated Token Accounts**: Special accounts for holding SPL tokens
-      `
+      `;
     }
-    
+
     if (url.includes('pdas')) {
       return `
         # Program Derived Addresses (PDAs)
@@ -139,7 +138,7 @@ export class SolanaKnowledgeBase {
         - Escrow accounts
         - Metadata accounts
         - Authority accounts
-      `
+      `;
     }
 
     if (url.includes('transactions')) {
@@ -165,28 +164,30 @@ export class SolanaKnowledgeBase {
         - 0x1: Insufficient funds
         - 0x1771: Custom program error
         - Blockhash not found: Transaction expired
-      `
+      `;
     }
 
     // Default content for other URLs
-    return `Documentation content from ${sourceName} at ${url}`
+    return `Documentation content from ${sourceName} at ${url}`;
   }
 
   /**
    * Break content into smaller, searchable chunks
    */
   private chunkContent(content: string, url: string, source: string): DocumentChunk[] {
-    const chunks: DocumentChunk[] = []
-    
+    const chunks: DocumentChunk[] = [];
+
     // Split by sections (## headers)
-    const sections = content.split(/(?=^##\s)/m)
-    
+    const sections = content.split(/(?=^##\s)/m);
+
     sections.forEach((section, index) => {
-      if (section.trim().length < 50) return // Skip very short sections
-      
-      const lines = section.trim().split('\n')
-      const title = lines[0]?.replace(/^#+\s*/, '') || `Section ${index + 1}`
-      
+      if (section.trim().length < 50) {
+        return;
+      } // Skip very short sections
+
+      const lines = section.trim().split('\n');
+      const title = lines[0]?.replace(/^#+\s*/, '') || `Section ${index + 1}`;
+
       chunks.push({
         id: `${source}-${url}-${index}`,
         content: section.trim(),
@@ -195,12 +196,12 @@ export class SolanaKnowledgeBase {
         title,
         metadata: {
           section: title,
-          wordCount: section.split(' ').length
-        }
-      })
-    })
+          wordCount: section.split(' ').length,
+        },
+      });
+    });
 
-    return chunks
+    return chunks;
   }
 
   /**
@@ -211,20 +212,20 @@ export class SolanaKnowledgeBase {
       const response = await fetch('https://api.openai.com/v1/embeddings', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.openaiApiKey}`,
+          Authorization: `Bearer ${this.openaiApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           input: text,
-          model: 'text-embedding-3-small'
+          model: 'text-embedding-3-small',
         }),
-      })
+      });
 
-      const data = await response.json()
-      return data.data[0].embedding
+      const data = await response.json();
+      return data.data[0].embedding;
     } catch (error) {
-      console.error('Failed to generate embedding:', error)
-      return []
+      console.error('Failed to generate embedding:', error);
+      return [];
     }
   }
 
@@ -232,22 +233,22 @@ export class SolanaKnowledgeBase {
    * Search the knowledge base for relevant content
    */
   async searchKnowledge(query: string, limit: number = 5): Promise<SearchResult[]> {
-    console.log(`🔍 Searching knowledge base for: "${query}"`)
-    
+    console.log(`🔍 Searching knowledge base for: "${query}"`);
+
     // For now, return mock results based on keywords
     // In production, this would use vector similarity search
-    const mockResults = this.mockSearch(query, limit)
-    
-    console.log(`✅ Found ${mockResults.length} relevant chunks`)
-    return mockResults
+    const mockResults = this.mockSearch(query, limit);
+
+    console.log(`✅ Found ${mockResults.length} relevant chunks`);
+    return mockResults;
   }
 
   /**
    * Mock search implementation (replace with vector search)
    */
   private mockSearch(query: string, limit: number): SearchResult[] {
-    const queryLower = query.toLowerCase()
-    const results: SearchResult[] = []
+    const queryLower = query.toLowerCase();
+    const results: SearchResult[] = [];
 
     // Mock knowledge base entries
     const mockKnowledge = [
@@ -257,15 +258,15 @@ export class SolanaKnowledgeBase {
         source: 'Solana Cookbook',
         url: 'https://solanacookbook.com/core-concepts/accounts',
         title: 'Account Structure',
-        metadata: { section: 'Accounts' }
+        metadata: { section: 'Accounts' },
       },
       {
-        id: 'pdas-1', 
+        id: 'pdas-1',
         content: `# Program Derived Addresses (PDAs)\n\nPDAs are special addresses derived from a program ID and seeds:\n\n\`\`\`rust\nlet (pda, bump) = Pubkey::find_program_address(\n    &[b"user-data", user.key().as_ref()],\n    program_id\n);\n\`\`\`\n\nPDAs have no private key and can only be signed by the deriving program.`,
         source: 'Solana Cookbook',
         url: 'https://solanacookbook.com/core-concepts/pdas',
         title: 'Program Derived Addresses',
-        metadata: { section: 'PDAs' }
+        metadata: { section: 'PDAs' },
       },
       {
         id: 'errors-1',
@@ -273,7 +274,7 @@ export class SolanaKnowledgeBase {
         source: 'Anchor Book',
         url: 'https://book.anchor-lang.com/chapter_4/errors.html',
         title: 'Transaction Errors',
-        metadata: { section: 'Errors' }
+        metadata: { section: 'Errors' },
       },
       {
         id: 'tokens-1',
@@ -281,72 +282,70 @@ export class SolanaKnowledgeBase {
         source: 'Solana Cookbook',
         url: 'https://solanacookbook.com/references/token',
         title: 'SPL Tokens',
-        metadata: { section: 'Tokens' }
-      }
-    ]
+        metadata: { section: 'Tokens' },
+      },
+    ];
 
     // Simple keyword matching (replace with vector similarity)
     for (const doc of mockKnowledge) {
-      let similarity = 0
-      
+      let similarity = 0;
+
       // Check for keyword matches
       if (queryLower.includes('account') && doc.content.toLowerCase().includes('account')) {
-        similarity += 0.8
+        similarity += 0.8;
       }
       if (queryLower.includes('pda') && doc.content.toLowerCase().includes('pda')) {
-        similarity += 0.9
+        similarity += 0.9;
       }
       if (queryLower.includes('error') && doc.content.toLowerCase().includes('error')) {
-        similarity += 0.9
+        similarity += 0.9;
       }
       if (queryLower.includes('token') && doc.content.toLowerCase().includes('token')) {
-        similarity += 0.8
+        similarity += 0.8;
       }
       if (queryLower.includes('0x1771') && doc.content.includes('0x1771')) {
-        similarity += 0.95
+        similarity += 0.95;
       }
       if (queryLower.includes('transaction') && doc.content.toLowerCase().includes('transaction')) {
-        similarity += 0.7
+        similarity += 0.7;
       }
 
       if (similarity > 0.5) {
         results.push({
           chunk: doc as DocumentChunk,
-          similarity
-        })
+          similarity,
+        });
       }
     }
 
     // Sort by similarity and return top results
-    return results
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, limit)
+    return results.sort((a, b) => b.similarity - a.similarity).slice(0, limit);
   }
 
   /**
    * Initialize the knowledge base (scrape and store documents)
    */
   async initialize(): Promise<void> {
-    console.log('🚀 Initializing Solana Knowledge Base...')
-    
+    console.log('🚀 Initializing Solana Knowledge Base...');
+
     try {
       // Scrape documentation
-      const chunks = await this.scrapeDocumentation()
-      
+      const chunks = await this.scrapeDocumentation();
+
       // Generate embeddings (in production)
       // for (const chunk of chunks) {
       //   chunk.embedding = await this.generateEmbedding(chunk.content)
       // }
-      
+
       // Store in vector database (in production)
       // await this.storeChunks(chunks)
-      
-      console.log('✅ Knowledge base initialized successfully')
+
+      console.log('✅ Knowledge base initialized successfully');
     } catch (error) {
-      console.error('❌ Failed to initialize knowledge base:', error)
+      console.error('❌ Failed to initialize knowledge base:', error);
     }
   }
 }
 
 // Export singleton instance
-export const solanaKnowledgeBase = new SolanaKnowledgeBase()
+export const solanaKnowledgeBase = new SolanaKnowledgeBase();

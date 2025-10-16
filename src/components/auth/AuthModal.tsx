@@ -16,23 +16,19 @@ interface AuthModalProps {
   defaultTab?: 'signin' | 'signup';
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  defaultTab = 'signin' 
-}) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultTab = 'signin' }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     displayName: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -59,12 +55,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       toast.error('Passwords do not match');
       return;
     }
-    
+
     setLoading(true);
     try {
       const { user, error } = await signUpWithEmail(
-        formData.email, 
-        formData.password, 
+        formData.email,
+        formData.password,
         formData.displayName
       );
       if (error) {
@@ -100,11 +96,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
+      <DialogContent className="border-slate-700 bg-slate-800 sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white text-center">
-            Welcome to Qognita
-          </DialogTitle>
+          <DialogTitle className="text-center text-white">Welcome to Qognita</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue={defaultTab} className="w-full">
@@ -120,7 +114,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <TabsContent value="signin" className="space-y-4">
             <form onSubmit={handleEmailSignIn} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signin-email" className="text-white">Email</Label>
+                <Label htmlFor="signin-email" className="text-white">
+                  Email
+                </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
@@ -130,14 +126,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="pl-10 bg-slate-700 border-slate-600 text-white"
+                    className="border-slate-600 bg-slate-700 pl-10 text-white"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signin-password" className="text-white">Password</Label>
+                <Label htmlFor="signin-password" className="text-white">
+                  Password
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
@@ -147,14 +145,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="pl-10 bg-slate-700 border-slate-600 text-white"
+                    className="border-slate-600 bg-slate-700 pl-10 text-white"
                     required
                   />
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700"
                 disabled={loading}
               >
@@ -192,7 +190,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <TabsContent value="signup" className="space-y-4">
             <form onSubmit={handleEmailSignUp} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signup-name" className="text-white">Display Name</Label>
+                <Label htmlFor="signup-name" className="text-white">
+                  Display Name
+                </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
@@ -202,14 +202,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     placeholder="Enter your name"
                     value={formData.displayName}
                     onChange={handleInputChange}
-                    className="pl-10 bg-slate-700 border-slate-600 text-white"
+                    className="border-slate-600 bg-slate-700 pl-10 text-white"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signup-email" className="text-white">Email</Label>
+                <Label htmlFor="signup-email" className="text-white">
+                  Email
+                </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
@@ -219,14 +221,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="pl-10 bg-slate-700 border-slate-600 text-white"
+                    className="border-slate-600 bg-slate-700 pl-10 text-white"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signup-password" className="text-white">Password</Label>
+                <Label htmlFor="signup-password" className="text-white">
+                  Password
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
@@ -236,14 +240,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     placeholder="Create a password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="pl-10 bg-slate-700 border-slate-600 text-white"
+                    className="border-slate-600 bg-slate-700 pl-10 text-white"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="text-white">Confirm Password</Label>
+                <Label htmlFor="confirm-password" className="text-white">
+                  Confirm Password
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
@@ -253,14 +259,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="pl-10 bg-slate-700 border-slate-600 text-white"
+                    className="border-slate-600 bg-slate-700 pl-10 text-white"
                     required
                   />
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700"
                 disabled={loading}
               >

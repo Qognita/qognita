@@ -1,46 +1,47 @@
-'use client'
+'use client';
 
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { BurnProjection as BurnProjectionType } from '@/services/tokenomics-tools'
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { BurnProjection as BurnProjectionType } from '@/services/tokenomics-tools';
 
 interface BurnProjectionProps {
-  data: BurnProjectionType[]
+  data: BurnProjectionType[];
 }
 
 export function BurnProjection({ data }: BurnProjectionProps) {
   return (
-    <div className="w-full h-[400px]">
+    <div className="h-[400px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data}>
           <defs>
             <linearGradient id="colorSupply" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1} />
             </linearGradient>
             <linearGradient id="colorCirculating" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
             </linearGradient>
             <linearGradient id="colorBurned" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1}/>
+              <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
-          <XAxis 
-            dataKey="quarter" 
-            className="text-xs"
-          />
-          <YAxis 
+          <XAxis dataKey="quarter" className="text-xs" />
+          <YAxis
             className="text-xs"
             tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
           />
-          <Tooltip 
-            formatter={(value: number, name: string) => [
-              value.toLocaleString(),
-              name
-            ]}
-          />
+          <Tooltip formatter={(value: number, name: string) => [value.toLocaleString(), name]} />
           <Legend />
           <Area
             type="monotone"
@@ -68,55 +69,52 @@ export function BurnProjection({ data }: BurnProjectionProps) {
           />
         </AreaChart>
       </ResponsiveContainer>
-      
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-3 h-3 rounded-full bg-purple-500" />
+
+      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="rounded-lg bg-purple-50 p-4 dark:bg-purple-900/20">
+          <div className="mb-2 flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-purple-500" />
             <span className="text-sm font-semibold">Total Supply</span>
           </div>
           <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
             {data[0]?.supply.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            Fixed maximum supply
-          </p>
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Fixed maximum supply</p>
         </div>
-        
-        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-3 h-3 rounded-full bg-green-500" />
+
+        <div className="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
+          <div className="mb-2 flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-green-500" />
             <span className="text-sm font-semibold">Circulating (Q8)</span>
           </div>
           <p className="text-2xl font-bold text-green-600 dark:text-green-400">
             {data[data.length - 1]?.circulatingSupply.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            After 2 years of burns
-          </p>
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">After 2 years of burns</p>
         </div>
-        
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
+
+        <div className="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+          <div className="mb-2 flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-red-500" />
             <span className="text-sm font-semibold">Total Burned (Q8)</span>
           </div>
           <p className="text-2xl font-bold text-red-600 dark:text-red-400">
             {data[data.length - 1]?.burned.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
             {((data[data.length - 1]?.burned / data[0]?.supply) * 100).toFixed(2)}% of supply
           </p>
         </div>
       </div>
-      
-      <div className="mt-4 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-        <h4 className="text-sm font-semibold mb-2">Deflationary Mechanism</h4>
+
+      <div className="mt-4 rounded-lg bg-orange-50 p-4 dark:bg-orange-900/20">
+        <h4 className="mb-2 text-sm font-semibold">Deflationary Mechanism</h4>
         <p className="text-xs text-gray-600 dark:text-gray-400">
-          Token burns reduce circulating supply over time, creating scarcity and potentially increasing value. 
-          This projection assumes consistent burn rate from transaction fees and other mechanisms.
+          Token burns reduce circulating supply over time, creating scarcity and potentially
+          increasing value. This projection assumes consistent burn rate from transaction fees and
+          other mechanisms.
         </p>
       </div>
     </div>
-  )
+  );
 }

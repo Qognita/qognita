@@ -1,5 +1,13 @@
 import { db } from '@/lib/firebase';
-import { doc, setDoc, collection, addDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
+import {
+  doc,
+  setDoc,
+  collection,
+  addDoc,
+  updateDoc,
+  increment,
+  serverTimestamp,
+} from 'firebase/firestore';
 
 export interface AnalysisRecord {
   userId?: string;
@@ -19,15 +27,15 @@ export const saveAnalysisRecord = async (record: AnalysisRecord, userId?: string
     const newRecord = {
       id: Date.now().toString(),
       ...record,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
-    
+
     localHistory.unshift(newRecord);
     // Keep only last 50 records in localStorage
     if (localHistory.length > 50) {
       localHistory.splice(50);
     }
-    
+
     localStorage.setItem('qognita_analysis_history', JSON.stringify(localHistory));
 
     // Save to Firestore if user is authenticated
@@ -35,14 +43,14 @@ export const saveAnalysisRecord = async (record: AnalysisRecord, userId?: string
       // Add to user's analysis collection
       await addDoc(collection(db, 'users', userId, 'analyses'), {
         ...record,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
       });
 
       // Update user stats
       const userRef = doc(db, 'users', userId);
       await updateDoc(userRef, {
         analysisCount: increment(1),
-        lastAnalysisAt: serverTimestamp()
+        lastAnalysisAt: serverTimestamp(),
       });
 
       console.log('✅ Analysis saved to Firestore');
@@ -55,21 +63,36 @@ export const saveAnalysisRecord = async (record: AnalysisRecord, userId?: string
   }
 };
 
-export const getRiskLevel = (risks: any[], trustScore?: number): 'low' | 'medium' | 'high' | 'critical' => {
-  if (!risks || risks.length === 0) return 'low';
+export const getRiskLevel = (
+  risks: any[],
+  trustScore?: number
+): 'low' | 'medium' | 'high' | 'critical' => {
+  if (!risks || risks.length === 0) {
+    return 'low';
+  }
 
-  const criticalRisks = risks.filter(risk => risk.severity === 'critical');
-  const highRisks = risks.filter(risk => risk.severity === 'high');
-  const mediumRisks = risks.filter(risk => risk.severity === 'medium');
+  const criticalRisks = risks.filter((risk) => risk.severity === 'critical');
+  const highRisks = risks.filter((risk) => risk.severity === 'high');
+  const mediumRisks = risks.filter((risk) => risk.severity === 'medium');
 
-  if (criticalRisks.length > 0) return 'critical';
-  if (highRisks.length > 0) return 'high';
-  if (mediumRisks.length > 0) return 'medium';
-  
+  if (criticalRisks.length > 0) {
+    return 'critical';
+  }
+  if (highRisks.length > 0) {
+    return 'high';
+  }
+  if (mediumRisks.length > 0) {
+    return 'medium';
+  }
+
   // Consider trust score if available
   if (trustScore !== undefined) {
-    if (trustScore < 30) return 'high';
-    if (trustScore < 60) return 'medium';
+    if (trustScore < 30) {
+      return 'high';
+    }
+    if (trustScore < 60) {
+      return 'medium';
+    }
   }
 
   return 'low';
@@ -78,19 +101,18 @@ export const getRiskLevel = (risks: any[], trustScore?: number): 'low' | 'medium
 export const getAnalysisStats = () => {
   try {
     const history = JSON.parse(localStorage.getItem('qognita_analysis_history') || '[]');
-    
+
     return {
       total: history.length,
       tokens: history.filter((item: any) => item.addressType === 'token').length,
       wallets: history.filter((item: any) => item.addressType === 'wallet').length,
       programs: history.filter((item: any) => item.addressType === 'program').length,
       transactions: history.filter((item: any) => item.addressType === 'transaction').length,
-      threats: history.filter((item: any) => 
-        item.riskLevel === 'high' || item.riskLevel === 'critical'
+      threats: history.filter(
+        (item: any) => item.riskLevel === 'high' || item.riskLevel === 'critical'
       ).length,
-      lastWeek: history.filter((item: any) => 
-        Date.now() - item.timestamp < 7 * 24 * 60 * 60 * 1000
-      ).length
+      lastWeek: history.filter((item: any) => Date.now() - item.timestamp < 7 * 24 * 60 * 60 * 1000)
+        .length,
     };
   } catch (error) {
     console.error('Failed to get analysis stats:', error);
@@ -101,7 +123,7 @@ export const getAnalysisStats = () => {
       programs: 0,
       transactions: 0,
       threats: 0,
-      lastWeek: 0
+      lastWeek: 0,
     };
   }
 };
